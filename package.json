@@ -1,0 +1,26 @@
+{
+  "name": "fe-icache",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ant-design/charts": "^2.2.1",
+    "@ant-design/icons-vue": "^7.0.1",
+    "@arco-design/web-vue": "^2.56.2",
+    "ant-design-vue": "^4.2.5",
+    "antd": "^5.21.1",
+    "echarts": "^5.5.1",
+    "element-plus": "^2.8.4",
+    "vue": "^3.4.37",
+    "vue-router": "4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.2",
+    "vite": "^5.4.1"
+  }
+}
