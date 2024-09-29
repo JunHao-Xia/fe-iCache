@@ -5,14 +5,13 @@
       </div>
       <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
         <a-menu-item key="/">
-          <HomeOutlined/>
+         <HomeOutlined/>
           <span><router-link to="/">Ocean Platform</router-link></span>
         </a-menu-item>
-
         <a-sub-menu key="sub1">
           <template #title>
               <span>
-                <pie-chart-outlined/>
+                <PieChartOutlined/>
                 <span>Cache</span>
               </span>
           </template>
@@ -29,7 +28,7 @@
         <a-sub-menu key="sub2">
           <template #title>
               <span>
-                <pie-chart-outlined/>
+                <CodeOutlined/>
                 <span>StateMachine</span>
               </span>
           </template>
@@ -66,22 +65,37 @@
     </a-layout>
   </a-layout>
 </template>
+
+
 <script lang="ts" setup>
 import {
   PieChartOutlined,
-  RiseOutlined,
   CodeOutlined,
   HomeOutlined,
-  createFromIconfontCN
 } from '@ant-design/icons-vue';
+
 import {RouterLink} from 'vue-router'
-import {ref} from 'vue';
+import {onMounted, ref} from 'vue';
+import {GetCacheUserAppNameList} from './api'
 const collapsed = ref<boolean>(true);
 const selectedKeys = ref<string[]>(['1']);
 const value = ref<string>('');
 const onSearch = (searchValue: string) => {
   console.log('use value', searchValue);
+}
+
+const CacheAppNameList = ref(null);
+
+const getCacheAppNameList = () => {
+  return CacheAppNameList.value;
 };
+
+onMounted(() => {
+  GetCacheUserAppNameList().then(data => {
+    CacheAppNameList.value = data;
+  });
+});
+
 </script>
 <style scoped>
 .container {
