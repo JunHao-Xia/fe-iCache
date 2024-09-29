@@ -3,7 +3,7 @@
     <a-layout-sider v-model:collapsed="collapsed" collapsible>
       <div class="logo">
       </div>
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
+      <a-menu v-model:selectedKeys="selectedKeys"  :theme="state.theme" :mode="state.mode">
         <a-menu-item key="/">
           <HomeOutlined/>
           <span><router-link to="/">Ocean Platform</router-link></span>
@@ -45,15 +45,7 @@
 
     <a-layout class="container">
 
-      <a-layout-header class="header_box">
-        <a-input-search
-            v-model:value="value"
-            placeholder="Search"
-            size="medium"
-            style="width: 200px"
-            @search="onSearch"
-        />
-      </a-layout-header>
+      <a-layout-header class="header_box">search</a-layout-header>
 
       <a-layout-content style="height: 100%; margin: 10px;">
         <div class="content_box">
@@ -76,44 +68,16 @@ import {
 } from '@ant-design/icons-vue';
 import {RouterLink} from 'vue-router'
 import {ref} from 'vue';
+import type { MenuMode, MenuTheme } from 'ant-design-vue';
+import { ItemType } from 'ant-design-vue';
 const collapsed = ref<boolean>(true);
 const selectedKeys = ref<string[]>(['1']);
-const value = ref<string>('');
-const onSearch = (searchValue: string) => {
-  console.log('use value', searchValue);
+const state = {
+  mode: 'inline' as MenuMode,
+  theme: 'light' as MenuTheme,
+  selectedKeys: ['1'],
+  openKeys: ['sub1'],
 };
+
 </script>
-<style scoped>
-.container {
-  background-color: aliceblue;
-  height: 100vh;
-}
-
-.content_box {
-  height: 100%;
-  overflow: hidden;
-  background: white;
-}
-
-#components-layout-demo-side .logo {
-  height: 32px;
-  margin: 16px;
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.header_box {
-  background: #fff;
-  line-height: 0px;
-  padding: 10px;
-  box-sizing: border-box;
-  margin: 10px;
-}
-
-.site-layout .site-layout-background {
-  background: #fff;
-}
-
-[data-theme='dark'] .site-layout .site-layout-background {
-  background: #141414;
-}
-</style>
+  
