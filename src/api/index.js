@@ -9,3 +9,13 @@ export function GetCacheUserAppNameList() {
     }
   })
 }
+
+export function GetCacheUserAddressList(appName) {
+  return request({
+    url: `/monitor/GetCacheUserAddressList/${appName}`,
+    method: 'GET',
+    headers: {
+      'debug': 'true',
+    }
+  });
+}

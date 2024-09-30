@@ -1,9 +1,34 @@
 <template>
   <div>monitor</div>
-  <demo></demo>
 </template>
+
+
 <script lang="ts" setup>
-import Demo from "../components/demo.vue";
+import {ref} from "vue";
+import {GetCacheUserAppNameList,GetCacheUserAddressList} from '../api'
+import {onMounted} from 'vue';
+
+onMounted(() => {
+  GetCacheAppNameList()
+});
+const CacheAppNameList = ref(null);
+function GetCacheAppNameList(){
+  GetCacheUserAppNameList().then(data => {
+    CacheAppNameList.value = data;
+  })
+}
+
+const CacheAddressList = ref(null);
+function GetCacheAddressList(){
+  GetCacheUserAddressList().then(data => {
+    CacheAddressList.value = data;
+  })
+}
+
+
 </script>
+
+
 <style scoped>
 </style>
+

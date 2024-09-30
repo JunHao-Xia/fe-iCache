@@ -75,26 +75,13 @@ import {
 } from '@ant-design/icons-vue';
 
 import {RouterLink} from 'vue-router'
-import {onMounted, ref} from 'vue';
-import {GetCacheUserAppNameList} from './api'
+import {ref} from 'vue';
 const collapsed = ref<boolean>(true);
 const selectedKeys = ref<string[]>(['1']);
 const value = ref<string>('');
 const onSearch = (searchValue: string) => {
-  console.log('use value', searchValue);
+  console.log(searchValue)
 }
-
-const CacheAppNameList = ref(null);
-
-const getCacheAppNameList = () => {
-  return CacheAppNameList.value;
-};
-
-onMounted(() => {
-  GetCacheUserAppNameList().then(data => {
-    CacheAppNameList.value = data;
-  });
-});
 
 </script>
 <style scoped>
