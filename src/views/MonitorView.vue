@@ -62,6 +62,9 @@ function GetCacheAppAddressList(appName){
 }
 
 const selectAppAddress = (value: string) => {
+  if (!value||value.length==0){
+    return
+  }
   CacheNameList(value)
 };
 
@@ -75,6 +78,9 @@ function CacheNameList(address){
 }
 
 const selectCacheName = (value: string) => {
+  if (!value||value.length==0){
+    return
+  }
   console.log(value);
 };
 
