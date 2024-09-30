@@ -80,7 +80,7 @@ const collapsed = ref<boolean>(true);
 const selectedKeys = ref<string[]>(['1']);
 const value = ref<string>('');
 const onSearch = (searchValue: string) => {
-  console.log(searchValue)
+
 }
 
 </script>
