@@ -35,31 +35,44 @@
         allow-clear="allow-clear"
     />
   </div>
-  <div>
-    <a-list size="small" bordered
-            :data-source="cacheKeyList"
-            style="width: 200px; height:470px;margin-top: 20px;margin-right: 10px;margin-left: 10px"
-    >
-      <template #renderItem="{item}">
-        <a-list-item>
-          <a-button style="width: 170px;height: 30px" >
-            {{item}}
-          </a-button>
-        </a-list-item>
-      </template>
-    </a-list>
-  </div>
+
+  <a-flex wrap="wrap" gap="small">
+    <div>
+      <a-list size="small" bordered
+              :data-source="cacheKeyList"
+              style="width: 200px; height:470px;margin-top: 20px;margin-right: 5px;margin-left: 10px"
+      >
+        <template #renderItem="{item}">
+          <a-list-item>
+            <a-button style="width: 250px;height: 30px" @click="cacheKeyClick({item})" >
+              {{item}}
+            </a-button>
+          </a-list-item>
+        </template>
+      </a-list>
+    </div>
+    <div>
+      <a-textarea
+          v-model:value="cacheValue"
+          placeholder=""
+          :rows="4"
+          style="width: 410px; height:470px;margin-top: 20px;"
+      />
+    </div>
+    </a-flex>
 </template>
 
 <script lang="ts" setup>
 import {ref} from "vue";
-import {GetAppNameList,GetAddressList,GetCacheNameList,GetCacheKeyList} from '../api'
+import {GetAppNameList,GetAddressList,GetCacheNameList,GetCacheKeyList,GetCacheValue} from '../api'
 import {onMounted} from 'vue';
 import {SelectProps} from "ant-design-vue";
+import {
+  RightSquareFilled
+} from '@ant-design/icons-vue';
 onMounted(() => {
   GetCacheAppNameList()
 });
-
 
 const defaultAppName = ref('AppName')
 let AppNameList = ref([]);
@@ -120,11 +133,28 @@ let searchCacheKey =ref("")
 function searchCache(value: string) {
   console.log(value)
 }
+
 // cacheKeyList
 let cacheKeyList =ref([])
 function CacheKeyList(address,cacheName) {
   GetCacheKeyList(cacheName,address).then(data => {
     cacheKeyList.value = data;
+  })
+}
+// cache key item
+let cacheKeyRow =ref("")
+function cacheKeyClick(row){
+   cacheKeyRow = row.item
+  CacheValue(selectName.value,cacheKeyRow,selectAddress.value)
+}
+
+//cache value
+let cacheValueRow =ref({})
+let cacheValue = ref<string>('');
+function CacheValue(cacheName,cacheKey,address) {
+  GetCacheValue(cacheName,cacheKey,address).then(data => {
+    cacheValueRow.value = data;
+    cacheValue =ref<string>(data.Data.ProductName)
   })
 }
 
