@@ -28,7 +28,7 @@
   <div>
     <a-input-search
         v-model:value="searchCacheKey"
-        placeholder="Search"
+        placeholder="CacheKey"
         size="middle"
         style="width: 200px;margin-top: 20px;margin-right: 10px;margin-left: 10px"
         @search="searchCache"
@@ -124,12 +124,6 @@ const selectCacheName = (value: string) => {
 };
 
 
-// search
-let searchCacheKey =ref("")
-function searchCache(value: string) {
-  console.log(value)
-}
-
 // cacheKeyList
 let cacheKeyList =ref([])
 function CacheKeyList(address,cacheName) {
@@ -148,10 +142,18 @@ function cacheKeyClick(row){
 let cacheValueRow = ref({})
 function CacheValue(cacheName,cacheKey,address) {
   GetCacheValue(cacheName,cacheKey,address).then(data => {
-    cacheValueRow.value = ref(data)
+      cacheValueRow.value = ref(data)
   })
 }
 
+// search
+let searchCacheKey =ref("")
+function searchCache(cacheKey: string) {
+  if(cacheKey.length == 0){
+    CacheKeyList(selectAddress.value,selectName.value)
+  }
+
+}
 
 
 
