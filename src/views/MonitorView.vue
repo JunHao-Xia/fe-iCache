@@ -2,7 +2,7 @@
   <div>
     <a-select
         ref="select"
-        style="width: 170px"
+        style="width: 200px;margin-right: 10px;margin-left: 10px"
         :options="AppNameSelect"
         @change="selectAppName"
         :placeholder='defaultAppName'
@@ -10,7 +10,7 @@
     ></a-select>
     <a-select
         ref="select"
-        style="width: 170px"
+        style="width: 200px;margin-right: 10px"
         :options="AppAddressSelect"
         @change="selectAppAddress"
         :placeholder='defaultAppAddress'
@@ -18,18 +18,42 @@
     ></a-select>
     <a-select
         ref="select"
-        style="width: 200px"
+        style="width: 200px;margin-right: 10px"
         :options="CacheNameSelect"
         @change="selectCacheName"
         :placeholder='defaultCacheName'
         allow-clear="allow-clear"
     ></a-select>
   </div>
+  <div>
+    <a-input-search
+        v-model:value="searchCacheKey"
+        placeholder="Search"
+        size="middle"
+        style="width: 200px;margin-top: 20px;margin-right: 10px;margin-left: 10px"
+        @search="searchCache"
+        allow-clear="allow-clear"
+    />
+  </div>
+  <div>
+    <a-list size="small" bordered
+            :data-source="cacheKeyList"
+            style="width: 200px; height:470px;margin-top: 20px;margin-right: 10px;margin-left: 10px"
+    >
+      <template #renderItem="{item}">
+        <a-list-item>
+          <a-button style="width: 170px;height: 30px" >
+            {{item}}
+          </a-button>
+        </a-list-item>
+      </template>
+    </a-list>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import {ref} from "vue";
-import {GetAppNameList,GetAddressList,GetCacheNameList} from '../api'
+import {GetAppNameList,GetAddressList,GetCacheNameList,GetCacheKeyList} from '../api'
 import {onMounted} from 'vue';
 import {SelectProps} from "ant-design-vue";
 onMounted(() => {
@@ -47,7 +71,9 @@ function GetCacheAppNameList(){
     })
 }
 
+let appName =ref("")
 const selectAppName = (value: string) => {
+  appName.value = value
   GetCacheAppAddressList(value)
 };
 
@@ -61,10 +87,12 @@ function GetCacheAppAddressList(appName){
   })
 }
 
+let selectAddress =ref("")
 const selectAppAddress = (value: string) => {
   if (!value||value.length==0){
     return
   }
+  selectAddress.value = value
   CacheNameList(value)
 };
 
@@ -77,16 +105,31 @@ function CacheNameList(address){
   })
 }
 
+let selectName =ref("")
 const selectCacheName = (value: string) => {
   if (!value||value.length==0){
     return
   }
-  console.log(value);
+  selectName.value = value
+  CacheKeyList(selectAddress.value,selectName.value)
 };
 
 
+// search
+let searchCacheKey =ref("")
+function searchCache(value: string) {
+  console.log(value)
+}
+// cacheKeyList
+let cacheKeyList =ref([])
+function CacheKeyList(address,cacheName) {
+  GetCacheKeyList(cacheName,address).then(data => {
+    cacheKeyList.value = data;
+  })
+}
 
-// 转换函数 string list to options
+
+//string list to options param
 function transformToOptions(list) {
   if (!list || list.length === 0) return []; // 如果labels为空，则返回空数组
   return list.map((label, index) => {
