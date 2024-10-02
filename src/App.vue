@@ -6,7 +6,7 @@
       <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
         <a-menu-item key="/">
          <HomeOutlined/>
-          <span><router-link to="/">Ocean Platform</router-link></span>
+          <span><router-link to="/">Potential Space</router-link></span>
         </a-menu-item>
         <a-sub-menu key="sub1">
           <template #title>
@@ -48,9 +48,10 @@
         <a-input-search
             v-model:value="value"
             placeholder="Search"
-            size="medium"
+            size="middle"
             style="width: 200px"
             @search="onSearch"
+            allow-clear="allow-clear"
         />
       </a-layout-header>
 
@@ -60,7 +61,7 @@
         </div>
       </a-layout-content>
       <a-layout-footer style="text-align: center">
-
+        Power By Potential Space
       </a-layout-footer>
     </a-layout>
   </a-layout>
