@@ -1,5 +1,5 @@
 <template>
-  <vue-json-viewer :value="cacheValue"
+  <vue-json-viewer :value="value"
                    show-double-quotes
                    boxed
                    sort
@@ -11,13 +11,10 @@
 
 <script setup>
 import VueJsonViewer from "vue-json-viewer"
-import {ref} from "vue";
 // 定义 props
 const {value} = defineProps({
   value: {
     type: Object,
-    default: () => ({})
   }
 });
-let cacheValue = ref(value)
 </script>
