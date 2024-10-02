@@ -52,24 +52,26 @@
       </a-list>
     </div>
     <div>
-      <a-textarea
-          v-model:value="cacheValue"
-          placeholder=""
-          :rows="4"
-          style="width: 410px; height:470px;margin-top: 20px;"
-      />
+      <json-view></json-view>
+<!--      <a-textarea-->
+<!--          placeholder="empty cache"-->
+<!--          :rows="4"-->
+<!--          style="width: 410px; height:470px;margin-top: 20px;"-->
+<!--      >-->
+<!--      </a-textarea>-->
+
     </div>
     </a-flex>
 </template>
+
 
 <script lang="ts" setup>
 import {ref} from "vue";
 import {GetAppNameList,GetAddressList,GetCacheNameList,GetCacheKeyList,GetCacheValue} from '../api'
 import {onMounted} from 'vue';
 import {SelectProps} from "ant-design-vue";
-import {
-  RightSquareFilled
-} from '@ant-design/icons-vue';
+import JsonView from "../components/JsonView.vue";
+
 onMounted(() => {
   GetCacheAppNameList()
 });
@@ -150,11 +152,9 @@ function cacheKeyClick(row){
 
 //cache value
 let cacheValueRow =ref({})
-let cacheValue = ref<string>('');
 function CacheValue(cacheName,cacheKey,address) {
   GetCacheValue(cacheName,cacheKey,address).then(data => {
     cacheValueRow.value = data;
-    cacheValue =ref<string>(data.Data.ProductName)
   })
 }
 
