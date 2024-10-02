@@ -52,7 +52,7 @@
       </a-list>
     </div>
     <div>
-      <json-view></json-view>
+      <json-view style="width: 410px; height:470px;margin-top: 20px;"></json-view>
 <!--      <a-textarea-->
 <!--          placeholder="empty cache"-->
 <!--          :rows="4"-->
