@@ -52,14 +52,8 @@
       </a-list>
     </div>
     <div>
-      <json-view style="width: 410px; height:470px;margin-top: 20px;"></json-view>
-<!--      <a-textarea-->
-<!--          placeholder="empty cache"-->
-<!--          :rows="4"-->
-<!--          style="width: 410px; height:470px;margin-top: 20px;"-->
-<!--      >-->
-<!--      </a-textarea>-->
-
+      <json-view :value="cacheValueRow" style="width: 410px; height:470px;margin-top: 20px;">
+      </json-view>
     </div>
     </a-flex>
 </template>
@@ -151,12 +145,14 @@ function cacheKeyClick(row){
 }
 
 //cache value
-let cacheValueRow =ref({})
+let cacheValueRow = ref({})
 function CacheValue(cacheName,cacheKey,address) {
   GetCacheValue(cacheName,cacheKey,address).then(data => {
-    cacheValueRow.value = data;
+    cacheValueRow.value = ref(data)
   })
 }
+
+
 
 
 //string list to options param

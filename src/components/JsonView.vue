@@ -12,18 +12,12 @@
 <script setup>
 import VueJsonViewer from "vue-json-viewer"
 import {ref} from "vue";
-let cacheValue = ref({
-  "Data": {
-    "ProductId": 1,
-    "ProductName": "MockProductName_1",
-    "ProductPrice": 2000,
-    "ProductSku": 1001
-  },
-  "WriteTime": 1727885796,
-  "AccessTime": 1727885796,
-  "CacheValueMetrics": {
-    "CacheSize": 16,
-    "CacheHitCount": 1
+// 定义 props
+const {value} = defineProps({
+  value: {
+    type: Object,
+    default: () => ({})
   }
-})
+});
+let cacheValue = ref(value)
 </script>
