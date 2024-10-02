@@ -4,6 +4,7 @@
                    boxed
                    sort
                    copyable
+                   :expand-depth="4"
   >
   </vue-json-viewer>
 </template>
