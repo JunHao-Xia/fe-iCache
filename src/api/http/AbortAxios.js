@@ -1,11 +1,7 @@
-
-
-import { AxiosRequestConfig } from "axios"
-
 /** 
  * 用于存储控制器
  */
-const pendingMap = new Map<string, AbortController>()
+const pendingMap = new Map();
 
 /**
  * 创建各请求唯一标识

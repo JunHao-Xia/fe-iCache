@@ -2,12 +2,12 @@ import axios from 'axios'
 import AbortAxios from './AbortAxios'
 
 class AxiosMax {
-  // axios实例, 通过axios.create()方法创建
-  private axiosInstance
-  // 传入的配置
-  private options
-  // 拦截器
-  private interceptors
+  // // axios实例, 通过axios.create()方法创建
+  // axiosInstance
+  // // 传入的配置
+  // options
+  // // 拦截器
+  // interceptors
   constructor(options) {
     this.axiosInstance = axios.create(options)
     this.options = options
