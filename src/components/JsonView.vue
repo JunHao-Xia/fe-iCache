@@ -11,7 +11,6 @@
 
 <script setup>
 import VueJsonViewer from "vue-json-viewer"
-// 定义 props
 const {value} = defineProps({
   value: {
     type: Object,
