@@ -1,8 +1,16 @@
 <template>
   <div>
+    <a-input-search
+        v-model:value="searchCacheKey"
+        placeholder="CacheKey"
+        size="middle"
+        style="width: 200px;margin-top: 20px;margin-right: 3px;margin-left: 10px"
+        @search="searchCache"
+        allow-clear="allow-clear"
+    />
     <a-select
         ref="select"
-        style="width: 200px;margin-right: 10px;margin-left: 10px"
+        style="width: 200px;margin-top: 20px;margin-right: 10px;margin-left: 10px"
         :options="AppNameSelect"
         @change="selectAppName"
         :placeholder='defaultAppName'
@@ -10,7 +18,7 @@
     ></a-select>
     <a-select
         ref="select"
-        style="width: 200px;margin-right: 10px"
+        style="width: 200px;margin-top: 20px;margin-right: 10px"
         :options="AppAddressSelect"
         @change="selectAppAddress"
         :placeholder='defaultAppAddress'
@@ -18,22 +26,12 @@
     ></a-select>
     <a-select
         ref="select"
-        style="width: 200px;margin-right: 10px"
+        style="width: 200px;margin-top: 20px;margin-right: 10px"
         :options="CacheNameSelect"
         @change="selectCacheName"
         :placeholder='defaultCacheName'
         allow-clear="allow-clear"
     ></a-select>
-  </div>
-  <div>
-    <a-input-search
-        v-model:value="searchCacheKey"
-        placeholder="CacheKey"
-        size="middle"
-        style="width: 200px;margin-top: 20px;margin-right: 10px;margin-left: 10px"
-        @search="searchCache"
-        allow-clear="allow-clear"
-    />
   </div>
 
   <a-flex wrap="wrap" gap="small">
@@ -52,7 +50,8 @@
       </a-list>
     </div>
     <div>
-      <json-view :value="cacheValueRow" style="width: 410px; height:470px;margin-top: 20px;">
+      <json-view :value="cacheValueRow"
+                 style="width: 620px; height:470px;margin-top: 20px;">
       </json-view>
     </div>
     </a-flex>
@@ -149,8 +148,12 @@ function CacheValue(cacheName,cacheKey,address) {
 // search
 let searchCacheKey =ref("")
 function searchCache(cacheKey: string) {
+  //if cacheKey is empty then search all cache key list
   if(cacheKey.length == 0){
     CacheKeyList(selectAddress.value,selectName.value)
+  }else {
+    //if cacheKey is not empty then only search input cache key
+    //filter from all cache key list
   }
 
 }
