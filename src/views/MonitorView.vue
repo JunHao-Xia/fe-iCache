@@ -4,13 +4,13 @@
         v-model:value="searchCacheKey"
         placeholder="CacheKey"
         size="middle"
-        style="width: 200px;margin-top: 20px;margin-right: 3px;margin-left: 10px"
+        style="width: 200px;margin-top: 20px;margin-right: 3px;margin-left: 5px"
         @search="searchCache"
         allow-clear="allow-clear"
     />
     <a-select
         ref="select"
-        style="width: 200px;margin-top: 20px;margin-right: 10px;margin-left: 10px"
+        style="width: 200px;margin-top: 20px;margin-right: 10px;margin-left: 5px"
         :options="AppNameSelect"
         @change="selectAppName"
         :placeholder='defaultAppName'
@@ -38,7 +38,7 @@
     <div>
       <a-list size="small" bordered
               :data-source="cacheKeyList"
-              style="width: 200px; height:470px;margin-top: 20px;margin-right: 5px;margin-left: 10px"
+              style="width: 200px; height:470px;margin-top: 20px;margin-left: 5px;background-color:white"
       >
         <template #renderItem="{item}">
           <a-list-item>

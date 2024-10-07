@@ -1,5 +1,5 @@
 <template>
-  <div class="monitor-center">
+  <div class="content_box">
     <div class="dashboard">
       <div class="chart-container">
         <div ref="memoryUsageChart" class="chart"></div>
@@ -176,8 +176,8 @@ const handleResize = () => {
 .monitor-center {
   width: 100%;
   min-height: 100vh;
-  background-color: #f0f0f0;
-  padding: 20px;
+  background: aliceblue;
+  padding: 10px;
   box-sizing: border-box;
   overflow-y: auto;
 }

@@ -60,9 +60,9 @@
           <router-view></router-view>
         </div>
       </a-layout-content>
-      <a-layout-footer style="text-align: center">
-        Power By Potential Space
-      </a-layout-footer>
+<!--      <a-layout-footer style="text-align: center">-->
+<!--        Power By Potential Space-->
+<!--      </a-layout-footer>-->
     </a-layout>
   </a-layout>
 </template>
@@ -87,35 +87,20 @@ const onSearch = (searchValue: string) => {
 </script>
 <style scoped>
 .container {
-  background-color: aliceblue;
+  background: aliceblue;
   height: 100vh;
 }
-
 .content_box {
   height: 100%;
   overflow: hidden;
-  background: white;
+  background: aliceblue;
+  margin: 0px 5px 5px;
 }
-
-#components-layout-demo-side .logo {
-  height: 32px;
-  margin: 16px;
-  background: rgba(255, 255, 255, 0.3);
-}
-
 .header_box {
-  background: #fff;
-  line-height: 0px;
+  background: aliceblue;
+  line-height: 0;
   padding: 10px;
   box-sizing: border-box;
   margin: 10px;
-}
-
-.site-layout .site-layout-background {
-  background: #fff;
-}
-
-[data-theme='dark'] .site-layout .site-layout-background {
-  background: #141414;
 }
 </style>
