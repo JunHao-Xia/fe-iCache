@@ -1,20 +1,20 @@
 <template>
-  <div class="dashboard">
-    <div class="chart-container">
-      <h2>内存使用</h2>
-      <div ref="memoryUsageChart" class="chart"></div>
-    </div>
-    <div class="chart-container">
-      <h2>缓存大小分类</h2>
-      <div ref="cacheSizeChart" class="chart"></div>
-    </div>
-    <div class="chart-container">
-      <h2>CPU占比</h2>
-      <div ref="cpuUsageChart" class="chart"></div>
-    </div>
-    <div class="chart-container">
-      <h2>缓存命中率</h2>
-      <div ref="cacheHitRateChart" class="chart"></div>
+  <div class="monitor-center">
+    <div class="dashboard">
+      <div class="chart-container">
+        <div ref="memoryUsageChart" class="chart"></div>
+      </div>
+      <div class="chart-container">
+
+        <div ref="cacheSizeChart" class="chart"></div>
+      </div>
+      <div class="chart-container">
+        <div ref="cpuUsageChart" class="chart"></div>
+      </div>
+      <div class="chart-container">
+        <h2>缓存命中率</h2>
+        <div ref="cacheHitRateChart" class="chart"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -173,12 +173,20 @@ const handleResize = () => {
 </script>
 
 <style scoped>
+.monitor-center {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
 .dashboard {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
-  padding: 20px;
-  background-color: #f0f0f0;
+  width: 100%;
 }
 
 .chart-container {
