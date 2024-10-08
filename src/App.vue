@@ -94,13 +94,14 @@ const onSearch = (searchValue: string) => {
   height: 100%;
   overflow: hidden;
   background: aliceblue;
-  margin: 0px 5px 5px;
+  margin: 5px 5px;
 }
 .header_box {
   background: aliceblue;
   line-height: 0;
   padding: 10px;
   box-sizing: border-box;
-  margin: 10px;
+  margin-left: 10px;
+  margin-bottom: -40px;
 }
 </style>
