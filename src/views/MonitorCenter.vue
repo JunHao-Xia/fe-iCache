@@ -1,4 +1,30 @@
 <template>
+  <div style="margin-bottom: 15px">
+    <a-select
+        ref="select"
+        style="width: 200px;margin-top: 20px;margin-right: 10px;margin-left: 5px"
+        :options="AppNameSelect"
+        @change="selectAppName"
+        :placeholder='defaultAppName'
+        allow-clear="allow-clear"
+    ></a-select>
+    <a-select
+        ref="select"
+        style="width: 200px;margin-top: 20px;margin-right: 10px"
+        :options="AppAddressSelect"
+        @change="selectAppAddress"
+        :placeholder='defaultAppAddress'
+        allow-clear="allow-clear"
+    ></a-select>
+    <a-select
+        ref="select"
+        style="width: 200px;margin-top: 20px;margin-right: 10px"
+        :options="CacheNameSelect"
+        @change="selectCacheName"
+        :placeholder='defaultCacheName'
+        allow-clear="allow-clear"
+    ></a-select>
+  </div>
   <div class="content_box">
     <div class="dashboard">
       <div class="chart-container">
@@ -19,9 +45,11 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import * as echarts from 'echarts';
+import {SelectProps} from "ant-design-vue";
+import {GetAddressList, GetAppNameList, GetCacheNameList} from "../api";
 
 const memoryUsageChart = ref(null);
 const cacheSizeChart = ref(null);
@@ -31,6 +59,9 @@ const cacheHitRateChart = ref(null);
 let charts = [];
 
 onMounted(() => {
+  //查询app name、app address、cache name
+  GetCacheAppNameList()
+
   // 内存使用图表
   const memoryChart = echarts.init(memoryUsageChart.value);
   memoryChart.setOption({
@@ -170,6 +201,62 @@ onUnmounted(() => {
 const handleResize = () => {
   charts.forEach(chart => chart.resize());
 };
+
+
+
+const defaultAppName = ref('AppName')
+let AppNameList = ref([]);
+let AppNameSelect = ref<SelectProps['options']>([]);
+function GetCacheAppNameList(){
+  GetAppNameList().then(data => {
+    AppNameList.value = data;
+    AppNameSelect.value = transformToOptions(data)
+  })
+}
+
+let appName =ref("")
+const selectAppName = (value: string) => {
+  appName.value = value
+  GetCacheAppAddressList(value)
+};
+
+let AppAddressList = ref([]);
+let AppAddressSelect = ref<SelectProps['options']>([]);
+let defaultAppAddress = ref('Address')
+function GetCacheAppAddressList(appName){
+  GetAddressList(appName).then(data => {
+    AppAddressList.value = data;
+    AppAddressSelect.value = transformToOptions(data)
+  })
+}
+
+let selectAddress =ref("")
+const selectAppAddress = (value: string) => {
+  if (!value||value.length==0){
+    return
+  }
+  selectAddress.value = value
+  CacheNameList(value)
+};
+
+
+let CacheNameSelect = ref<SelectProps['options']>([]);
+let defaultCacheName = ref('CacheName')
+function CacheNameList(address){
+  GetCacheNameList(address).then(data => {
+    CacheNameSelect.value = transformToOptions(data)
+  })
+}
+
+let selectName =ref("")
+const selectCacheName = (value: string) => {
+  if (!value||value.length==0){
+    return
+  }
+  selectName.value = value
+  CacheKeyList(selectAddress.value,selectName.value)
+};
+
 </script>
 
 <style scoped>
@@ -187,6 +274,8 @@ const handleResize = () => {
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   width: 100%;
+  height: 50%;
+  margin-left: 5px;
 }
 
 .chart-container {
@@ -204,7 +293,7 @@ h2 {
 
 .chart {
   width: 100%;
-  height: 300px;
+  height: 250px;
 }
 
 @media (max-width: 768px) {
@@ -213,3 +302,4 @@ h2 {
   }
 }
 </style>
+
