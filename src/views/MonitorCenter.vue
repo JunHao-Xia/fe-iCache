@@ -49,7 +49,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import * as echarts from 'echarts';
 import {SelectProps} from "ant-design-vue";
-import {GetAddressList, GetAppNameList, GetCacheNameList} from "../api";
+import {GetAddressList, GetAppNameList, GetCacheNameList,GetCacheMetrics} from "../api";
 
 const memoryUsageChart = ref(null);
 const cacheSizeChart = ref(null);
@@ -254,8 +254,15 @@ const selectCacheName = (value: string) => {
     return
   }
   selectName.value = value
-  CacheKeyList(selectAddress.value,selectName.value)
+  GetMetrics(selectAddress.value,selectName.value)
 };
+let CacheMetrics = ref()
+function GetMetrics(address,cacheName) {
+  GetCacheMetrics(address,cacheName).then(data => {
+    CacheMetrics.value = data
+    console.log(CacheMetrics)
+  })
+}
 
 </script>
 
