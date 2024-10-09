@@ -25,3 +25,9 @@ export function GetCacheValue(cacheName,cacheKey,address) {
     url: `/monitor/GetValueToCacheUser/${cacheName}/${cacheKey}/${address}`
   });
 }
+
+export function GetCacheMetrics(cacheName,address) {
+  return _useRequest.get({
+    url: `/monitor/GetCacheMetrics/${cacheName}/${address}`
+  });
+}
