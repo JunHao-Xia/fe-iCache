@@ -247,7 +247,6 @@ function CacheNameList(address){
     CacheNameSelect.value = transformToOptions(data)
   })
 }
-
 let selectName =ref("")
 const selectCacheName = (value: string) => {
   if (!value||value.length==0){
