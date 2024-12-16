@@ -1,63 +1,67 @@
 <template>
-  <div>
-    <a-input-search
-        v-model:value="searchCacheKey"
-        placeholder="CacheKey"
-        size="middle"
-        style="width: 200px;margin-top: 20px;margin-right: 3px;margin-left: 5px"
-        @search="searchCache"
-        allow-clear="allow-clear"
-    />
-    <a-select
-        v-model:value="appName"
-        style="width: 200px;margin-top: 20px;margin-right: 10px;margin-left: 5px"
-        :options="AppNameSelect"
-        @change="selectAppName"
-        :placeholder='defaultAppName'
-        allow-clear="allow-clear"
-    ></a-select>
-    <a-select
-        v-model:value="selectAddress"
-        style="width: 200px;margin-top: 20px;margin-right: 10px"
-        :options="AppAddressSelect"
-        @change="selectAppAddress"
-        :placeholder='defaultAppAddress'
-        allow-clear="allow-clear"
-    ></a-select>
-    <a-select
-        v-model:value="selectName"
-        style="width: 200px;margin-top: 20px;margin-right: 10px"
-        :options="CacheNameSelect"
-        @change="selectCacheName"
-        :placeholder='defaultCacheName'
-        allow-clear="allow-clear"
-    ></a-select>
-  </div>
+  <div style="padding: 20px; display: flex; flex-direction: column; height: 100vh;">
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+      <a-input-search
+          v-model:value="searchCacheKey"
+          placeholder="CacheKey"
+          size="middle"
+          style="width: 200px; margin-right: 10px;"
+          @search="searchCache"
+          allow-clear="allow-clear"
+      />
+      <div style="display: flex; gap: 10px; flex-grow: 1;">
+        <a-select
+            v-model:value="appName"
+            style="width: 200px;"
+            :options="AppNameSelect"
+            @change="selectAppName"
+            :placeholder='defaultAppName'
+            allow-clear="allow-clear"
+        ></a-select>
+        <a-select
+            v-model:value="selectAddress"
+            style="width: 200px;"
+            :options="AppAddressSelect"
+            @change="selectAppAddress"
+            :placeholder='defaultAppAddress'
+            allow-clear="allow-clear"
+        ></a-select>
+        <a-select
+            v-model:value="selectName"
+            style="width: 200px;"
+            :options="CacheNameSelect"
+            @change="selectCacheName"
+            :placeholder='defaultCacheName'
+            allow-clear="allow-clear"
+        ></a-select>
+      </div>
+    </div>
 
-  <a-flex wrap="wrap" gap="small">
-    <div>
-      <a-list size="small" bordered
-              :data-source="filteredCacheKeyList"
-              style="width: 200px; height:470px;margin-top: 20px;margin-left: 5px;background-color:white"
-      >
-        <template #renderItem="{item}">
-          <a-list-item>
-            <a-button 
-              :style="{ backgroundColor: selectedCacheKey === item ? '#e6f7ff' : 'transparent' }"
-              style="width: 250px;height: 30px" 
-              @click="cacheKeyClick({item})">
-              {{item}}
-            </a-button>
-          </a-list-item>
-        </template>
-      </a-list>
+    <div style="display: flex; gap: 20px; flex-grow: 1;">
+      <div style="flex: 1; min-width: 200px; max-height: calc(100vh - 150px);">
+        <a-list size="small" bordered
+                :data-source="filteredCacheKeyList"
+                style="height: 100%; background-color: white;"
+        >
+          <template #renderItem="{item}">
+            <a-list-item>
+              <a-button 
+                :style="{ backgroundColor: selectedCacheKey === item ? '#e6f7ff' : 'transparent' }"
+                style="width: 100%; height: 30px;" 
+                @click="cacheKeyClick({item})">
+                {{item}}
+              </a-button>
+            </a-list-item>
+          </template>
+        </a-list>
+      </div>
+      <div style="flex: 2; min-width: 620px; max-height: calc(100vh - 150px);">
+        <json-view :value="cacheValueRow"
+                   style="height: 100%; margin-top: 0;">
+        </json-view>
+      </div>
     </div>
-    <div>
-      <json-view :value="cacheValueRow"
-                 style="width: 620px; height:470px;margin-top: 20px;">
-      </json-view>
-    </div>
-  </a-flex>
+  </div>
 </template>
 
 <script lang="ts" setup>
