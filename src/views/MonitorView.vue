@@ -9,7 +9,7 @@
         allow-clear="allow-clear"
     />
     <a-select
-        ref="select"
+        v-model:value="appName"
         style="width: 200px;margin-top: 20px;margin-right: 10px;margin-left: 5px"
         :options="AppNameSelect"
         @change="selectAppName"
@@ -17,7 +17,7 @@
         allow-clear="allow-clear"
     ></a-select>
     <a-select
-        ref="select"
+        v-model:value="selectAddress"
         style="width: 200px;margin-top: 20px;margin-right: 10px"
         :options="AppAddressSelect"
         @change="selectAppAddress"
@@ -25,7 +25,7 @@
         allow-clear="allow-clear"
     ></a-select>
     <a-select
-        ref="select"
+        v-model:value="selectName"
         style="width: 200px;margin-top: 20px;margin-right: 10px"
         :options="CacheNameSelect"
         @change="selectCacheName"
@@ -37,12 +37,15 @@
   <a-flex wrap="wrap" gap="small">
     <div>
       <a-list size="small" bordered
-              :data-source="cacheKeyList"
+              :data-source="filteredCacheKeyList"
               style="width: 200px; height:470px;margin-top: 20px;margin-left: 5px;background-color:white"
       >
         <template #renderItem="{item}">
           <a-list-item>
-            <a-button style="width: 250px;height: 30px" @click="cacheKeyClick({item})" >
+            <a-button 
+              :style="{ backgroundColor: selectedCacheKey === item ? '#e6f7ff' : 'transparent' }"
+              style="width: 250px;height: 30px" 
+              @click="cacheKeyClick({item})">
               {{item}}
             </a-button>
           </a-list-item>
@@ -54,126 +57,127 @@
                  style="width: 620px; height:470px;margin-top: 20px;">
       </json-view>
     </div>
-    </a-flex>
+  </a-flex>
 </template>
 
-
 <script lang="ts" setup>
-import {ref} from "vue";
-import {GetAppNameList,GetAddressList,GetCacheNameList,GetCacheKeyList,GetCacheValue} from '../api'
-import {onMounted} from 'vue';
-import {SelectProps} from "ant-design-vue";
+import { ref, onMounted } from "vue";
+import { GetAppNameList, GetAddressList, GetCacheNameList, GetCacheKeyList, GetCacheValue } from '../api/mockApi';
+import { SelectProps } from "ant-design-vue";
 import JsonView from "../components/JsonView.vue";
 
+const defaultAppName = ref('AppName');
+const appName = ref("");
+const AppNameList = ref([]);
+const AppNameSelect = ref<SelectProps['options']>([]);
+
+const selectAddress = ref("");
+const AppAddressList = ref([]);
+const AppAddressSelect = ref<SelectProps['options']>([]);
+
+const selectName = ref("");
+const CacheNameSelect = ref<SelectProps['options']>([]);
+
+const cacheKeyList = ref([]);
+const filteredCacheKeyList = ref([]);
+const cacheValueRow = ref({});
+const selectedCacheKey = ref("");
+const searchCacheKey = ref("");
+
 onMounted(() => {
-  GetCacheAppNameList()
+  GetCacheAppNameList();
 });
 
-const defaultAppName = ref('AppName')
-let AppNameList = ref([]);
-let AppNameSelect = ref<SelectProps['options']>([]);
-function GetCacheAppNameList(){
+function GetCacheAppNameList() {
   GetAppNameList().then(data => {
     AppNameList.value = data;
-    AppNameSelect.value = transformToOptions(data)
-    })
-}
-
-let appName =ref("")
-const selectAppName = (value: string) => {
-  appName.value = value
-  GetCacheAppAddressList(value)
-};
-
-let AppAddressList = ref([]);
-let AppAddressSelect = ref<SelectProps['options']>([]);
-let defaultAppAddress = ref('Address')
-function GetCacheAppAddressList(appName){
-  GetAddressList(appName).then(data => {
-    AppAddressList.value = data;
-    AppAddressSelect.value = transformToOptions(data)
-  })
-}
-
-let selectAddress =ref("")
-const selectAppAddress = (value: string) => {
-  if (!value||value.length==0){
-    return
-  }
-  selectAddress.value = value
-  CacheNameList(value)
-};
-
-
-let CacheNameSelect = ref<SelectProps['options']>([]);
-let defaultCacheName = ref('CacheName')
-function CacheNameList(address){
-  GetCacheNameList(address).then(data => {
-    CacheNameSelect.value = transformToOptions(data)
-  })
-}
-
-let selectName =ref("")
-const selectCacheName = (value: string) => {
-  if (!value||value.length==0){
-    return
-  }
-  selectName.value = value
-  CacheKeyList(selectAddress.value,selectName.value)
-};
-
-
-// cacheKeyList
-let cacheKeyList =ref([])
-function CacheKeyList(address,cacheName) {
-  GetCacheKeyList(cacheName,address).then(data => {
-    cacheKeyList.value = data;
-  })
-}
-// cache key item
-let cacheKeyRow =ref("")
-function cacheKeyClick(row){
-   cacheKeyRow = row.item
-  CacheValue(selectName.value,cacheKeyRow,selectAddress.value)
-}
-
-//cache value
-let cacheValueRow = ref({})
-function CacheValue(cacheName,cacheKey,address) {
-  GetCacheValue(cacheName,cacheKey,address).then(data => {
-      cacheValueRow.value = ref(data)
-  })
-}
-
-// search
-let searchCacheKey =ref("")
-function searchCache(cacheKey: string) {
-  //if cacheKey is empty then search all cache key list
-  if(cacheKey.length == 0){
-    CacheKeyList(selectAddress.value,selectName.value)
-  }else {
-    //if cacheKey is not empty then only search input cache key
-    //filter from all cache key list
-  }
-
-}
-
-
-
-//string list to options param
-function transformToOptions(list) {
-  if (!list || list.length === 0) return []; // 如果labels为空，则返回空数组
-  return list.map((label, index) => {
-    return {
-      value: label,
-      label,
-    };
+    AppNameSelect.value = transformToOptions(data);
+    if (AppNameSelect.value.length > 0) {
+      selectAppName(AppNameSelect.value[0].value);
+    }
   });
 }
 
+const selectAppName = (value: string) => {
+  appName.value = value;
+  GetCacheAppAddressList(value);
+};
 
+function GetCacheAppAddressList(appName) {
+  GetAddressList(appName).then(data => {
+    AppAddressList.value = data;
+    AppAddressSelect.value = transformToOptions(data);
+    if (AppAddressSelect.value.length > 0) {
+      selectAppAddress(AppAddressSelect.value[0].value);
+    }
+  });
+}
+
+const selectAppAddress = (value: string) => {
+  if (!value || value.length == 0) {
+    return;
+  }
+  selectAddress.value = value;
+  CacheNameList(value);
+};
+
+function CacheNameList(address) {
+  GetCacheNameList(address).then(data => {
+    CacheNameSelect.value = transformToOptions(data);
+    if (CacheNameSelect.value.length > 0) {
+      selectCacheName(CacheNameSelect.value[0].value);
+    }
+  });
+}
+
+const selectCacheName = (value: string) => {
+  if (!value || value.length == 0) {
+    return;
+  }
+  selectName.value = value;
+  CacheKeyList(selectAddress.value, selectName.value);
+};
+
+function CacheKeyList(address, cacheName) {
+  GetCacheKeyList(cacheName, address).then(data => {
+    cacheKeyList.value = data;
+    filteredCacheKeyList.value = data;
+    if (cacheKeyList.value.length > 0) {
+      selectedCacheKey.value = cacheKeyList.value[0];
+      cacheKeyClick({ item: selectedCacheKey.value });
+    }
+  });
+}
+
+function cacheKeyClick(row) {
+  const cacheKeyRow = row.item;
+  selectedCacheKey.value = cacheKeyRow;
+  CacheValue(selectName.value, cacheKeyRow, selectAddress.value);
+}
+
+function CacheValue(cacheName, cacheKey, address) {
+  GetCacheValue(cacheName, cacheKey, address).then(data => {
+    cacheValueRow.value = data;
+  });
+}
+
+function searchCache() {
+  const searchTerm = searchCacheKey.value.toLowerCase();
+  filteredCacheKeyList.value = cacheKeyList.value.filter(key => key.toLowerCase().includes(searchTerm));
+  
+  if (filteredCacheKeyList.value.length === 0) {
+    cacheValueRow.value = {};
+  } else if (filteredCacheKeyList.value.length > 0) {
+    selectedCacheKey.value = filteredCacheKeyList.value[0];
+    CacheValue(selectName.value, selectedCacheKey.value, selectAddress.value);
+  }
+}
+
+function transformToOptions(list) {
+  if (!list || list.length === 0) return [];
+  return list.map(label => ({ value: label, label }));
+}
 </script>
-
 
 <style scoped>
 </style>

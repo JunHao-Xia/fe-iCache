@@ -1,7 +1,7 @@
 <template>
   <div style="margin-bottom: 15px">
     <a-select
-        ref="select"
+        v-model:value="appName"
         style="width: 200px;margin-top: 20px;margin-right: 10px;margin-left: 5px"
         :options="AppNameSelect"
         @change="selectAppName"
@@ -9,7 +9,7 @@
         allow-clear="allow-clear"
     ></a-select>
     <a-select
-        ref="select"
+        v-model:value="selectAddress"
         style="width: 200px;margin-top: 20px;margin-right: 10px"
         :options="AppAddressSelect"
         @change="selectAppAddress"
@@ -17,7 +17,7 @@
         allow-clear="allow-clear"
     ></a-select>
     <a-select
-        ref="select"
+        v-model:value="selectName"
         style="width: 200px;margin-top: 20px;margin-right: 10px"
         :options="CacheNameSelect"
         @change="selectCacheName"
@@ -31,7 +31,6 @@
         <div ref="memoryUsageChart" class="chart"></div>
       </div>
       <div class="chart-container">
-
         <div ref="cacheSizeChart" class="chart"></div>
       </div>
       <div class="chart-container">
@@ -49,7 +48,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import * as echarts from 'echarts';
 import {SelectProps} from "ant-design-vue";
-import {GetAddressList, GetAppNameList, GetCacheNameList,GetCacheMetrics} from "../api";
+import {GetAddressList, GetAppNameList, GetCacheNameList, GetMetricsByCombination} from "../api/mockApi";
 
 const memoryUsageChart = ref(null);
 const cacheSizeChart = ref(null);
@@ -59,137 +58,8 @@ const cacheHitRateChart = ref(null);
 let charts = [];
 
 onMounted(() => {
-  //查询app name、app address、cache name
-  GetCacheAppNameList()
-
-  // 内存使用图表
-  const memoryChart = echarts.init(memoryUsageChart.value);
-  memoryChart.setOption({
-    title: { text: '内存使用' },
-    xAxis: {
-      type: 'category',
-      data: ['1月', '2月', '3月', '4月', '5月', '6月']
-    },
-    yAxis: {
-      type: 'value',
-      axisLabel: {
-        formatter: '{value} KB'
-      }
-    },
-    series: [{
-      data: [350, 370, 250, 300, 320, 280],
-      type: 'line',
-      smooth: true
-    }]
-  });
-
-  // 缓存大小分类图表
-  const cacheChart = echarts.init(cacheSizeChart.value);
-  cacheChart.setOption({
-    title: { text: '缓存大小分类' },
-    tooltip: {
-      trigger: 'item',
-      formatter: '{a} <br/>{b}: {c} ({d}%)'
-    },
-    legend: {
-      orient: 'vertical',
-      right: 10,
-      top: 'center'
-    },
-    series: [{
-      name: '缓存大小',
-      type: 'pie',
-      radius: ['50%', '70%'],
-      avoidLabelOverlap: false,
-      label: {
-        show: false,
-        position: 'center'
-      },
-      emphasis: {
-        label: {
-          show: true,
-          fontSize: '20',
-          fontWeight: 'bold'
-        }
-      },
-      labelLine: {
-        show: false
-      },
-      data: [
-        { value: 590, name: 'user_cache' },
-        { value: 142, name: 'stock_cache' },
-        { value: 340, name: 'rule_cache' },
-        { value: 410, name: 'trade-cache' }
-      ]
-    }]
-  });
-
-  // CPU占比图表
-  const cpuChart = echarts.init(cpuUsageChart.value);
-  cpuChart.setOption({
-    title: { text: 'CPU占比' },
-    xAxis: {
-      type: 'category',
-      data: ['0:12', '1:12', '2:12', '3:12', '4:12']
-    },
-    yAxis: {
-      type: 'value',
-      axisLabel: {
-        formatter: '{value}k'
-      }
-    },
-    series: [{
-      data: [5, 0.5, 7, 0.1, 5],
-      type: 'line',
-      smooth: true
-    }]
-  });
-
-  // 缓存命中率图表
-  const hitRateChart = echarts.init(cacheHitRateChart.value);
-  hitRateChart.setOption({
-    title: {
-      text: '缓存命中率',
-      subtext: '70%',
-      x: 'center',
-      y: 'center',
-      textStyle: {
-        fontSize: 20,
-        fontWeight: 'normal'
-      },
-      subtextStyle: {
-        fontSize: 30,
-        fontWeight: 'bold',
-        color: '#4e7afa'
-      }
-    },
-    series: [{
-      name: '缓存命中率',
-      type: 'pie',
-      radius: ['65%', '80%'],
-      avoidLabelOverlap: false,
-      label: {
-        show: false,
-        position: 'center'
-      },
-      emphasis: {
-        label: {
-          show: false
-        }
-      },
-      labelLine: {
-        show: false
-      },
-      data: [
-        { value: 70, name: '命中', itemStyle: { color: '#4e7afa' } },
-        { value: 30, name: '未命中', itemStyle: { color: '#e6e8f0' } }
-      ]
-    }]
-  });
-
-  charts = [memoryChart, cacheChart, cpuChart, hitRateChart];
-
-  // 响应式调整
+  GetCacheAppNameList();
+  setupCharts();
   window.addEventListener('resize', handleResize);
 });
 
@@ -202,68 +72,125 @@ const handleResize = () => {
   charts.forEach(chart => chart.resize());
 };
 
+function setupCharts() {
+  const memoryChart = echarts.init(memoryUsageChart.value);
+  const cacheChart = echarts.init(cacheSizeChart.value);
+  const cpuChart = echarts.init(cpuUsageChart.value);
+  const hitRateChart = echarts.init(cacheHitRateChart.value);
 
+  memoryChart.setOption({
+    title: { text: '内存使用' },
+    xAxis: { type: 'category', data: ['1月', '2月', '3月'] },
+    yAxis: { type: 'value', axisLabel: { formatter: '{value} KB' } },
+    series: [{ data: [], type: 'line', smooth: true }]
+  });
 
-const defaultAppName = ref('AppName')
-let AppNameList = ref([]);
-let AppNameSelect = ref<SelectProps['options']>([]);
-function GetCacheAppNameList(){
-  GetAppNameList().then(data => {
-    AppNameList.value = data;
-    AppNameSelect.value = transformToOptions(data)
-  })
+  cacheChart.setOption({
+    title: { text: '缓存大小分类' },
+    series: [{ name: '缓存大小', type: 'pie', radius: ['50%', '70%'], data: [] }]
+  });
+
+  cpuChart.setOption({
+    title: { text: 'CPU占比' },
+    xAxis: { type: 'category', data: ['0:12', '1:12', '2:12'] },
+    yAxis: { type: 'value', axisLabel: { formatter: '{value}k' } },
+    series: [{ data: [], type: 'line', smooth: true }]
+  });
+
+  hitRateChart.setOption({
+    title: { text: '缓存命中率', subtext: '', x: 'center', y: 'center' },
+    series: [{ name: '缓存命中率', type: 'pie', radius: ['65%', '80%'], data: [] }]
+  });
+
+  charts = [memoryChart, cacheChart, cpuChart, hitRateChart];
 }
 
-let appName =ref("")
+const defaultAppName = ref('AppName');
+let AppNameList = ref([]);
+let AppNameSelect = ref<SelectProps['options']>([]);
+function GetCacheAppNameList() {
+  GetAppNameList().then(data => {
+    AppNameList.value = data;
+    AppNameSelect.value = transformToOptions(data);
+    if (AppNameSelect.value.length > 0) {
+      selectAppName(AppNameSelect.value[0].value);
+    }
+  });
+}
+
+let appName = ref("");
 const selectAppName = (value: string) => {
-  appName.value = value
-  GetCacheAppAddressList(value)
+  appName.value = value;
+  GetCacheAppAddressList(value);
 };
 
 let AppAddressList = ref([]);
 let AppAddressSelect = ref<SelectProps['options']>([]);
-let defaultAppAddress = ref('Address')
-function GetCacheAppAddressList(appName){
+let defaultAppAddress = ref('Address');
+function GetCacheAppAddressList(appName) {
   GetAddressList(appName).then(data => {
     AppAddressList.value = data;
-    AppAddressSelect.value = transformToOptions(data)
-  })
+    AppAddressSelect.value = transformToOptions(data);
+    if (AppAddressSelect.value.length > 0) {
+      selectAppAddress(AppAddressSelect.value[0].value);
+    }
+  });
 }
 
-let selectAddress =ref("")
+let selectAddress = ref("");
 const selectAppAddress = (value: string) => {
-  if (!value||value.length==0){
-    return
+  if (!value || value.length == 0) {
+    return;
   }
-  selectAddress.value = value
-  CacheNameList(value)
+  selectAddress.value = value;
+  CacheNameList(value);
 };
-
 
 let CacheNameSelect = ref<SelectProps['options']>([]);
-let defaultCacheName = ref('CacheName')
-function CacheNameList(address){
+let defaultCacheName = ref('CacheName');
+function CacheNameList(address) {
   GetCacheNameList(address).then(data => {
-    CacheNameSelect.value = transformToOptions(data)
-  })
+    CacheNameSelect.value = transformToOptions(data);
+    if (CacheNameSelect.value.length > 0) {
+      selectCacheName(CacheNameSelect.value[0].value);
+    }
+  });
 }
 
-let selectName =ref("")
+let selectName = ref("");
 const selectCacheName = (value: string) => {
-  if (!value||value.length==0){
-    return
+  if (!value || value.length == 0) {
+    return;
   }
-  selectName.value = value
-  GetMetrics(selectAddress.value,selectName.value)
+  selectName.value = value;
+  fetchMetrics(appName.value, selectAddress.value, selectName.value);
 };
-let CacheMetrics = ref()
-function GetMetrics(address,cacheName) {
-  GetCacheMetrics(address,cacheName).then(data => {
-    CacheMetrics.value = data
-    console.log(CacheMetrics)
-  })
+
+function fetchMetrics(appName, address, cacheName) {
+  GetMetricsByCombination(appName, address, cacheName).then(data => {
+    updateCharts(data);
+  });
 }
 
+function updateCharts(data) {
+  charts[0].setOption({ series: [{ data: data.memoryUsage }] });
+  charts[1].setOption({ series: [{ data: data.cacheSizeDistribution }] });
+  charts[2].setOption({ series: [{ data: data.cpuUsage }] });
+  charts[3].setOption({
+    title: { subtext: `${data.cacheHitRate}%` },
+    series: [{
+      data: [
+        { value: data.cacheHitRate, name: '命中', itemStyle: { color: '#4e7afa' } },
+        { value: 100 - data.cacheHitRate, name: '未命中', itemStyle: { color: '#e6e8f0' } }
+      ]
+    }]
+  });
+}
+
+function transformToOptions(list) {
+  if (!list || list.length === 0) return [];
+  return list.map(label => ({ value: label, label }));
+}
 </script>
 
 <style scoped>
