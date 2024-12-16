@@ -6,7 +6,7 @@
       <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
         <a-menu-item key="/">
          <HomeOutlined/>
-          <span><router-link to="/">Potential Space</router-link></span>
+          <span><router-link to="/">Ocean</router-link></span>
         </a-menu-item>
         <a-sub-menu key="sub1">
           <template #title>
