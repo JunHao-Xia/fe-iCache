@@ -48,7 +48,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import * as echarts from 'echarts';
 import {SelectProps} from "ant-design-vue";
-import {GetAddressList, GetAppNameList, GetCacheNameList, GetMetricsByCombination} from "../api/mockApi";
+import {GetAddressList, GetAppNameList, GetCacheNameList, GetMetricsByCombination} from "../../api/mockApi";
 
 const memoryUsageChart = ref(null);
 const cacheSizeChart = ref(null);
