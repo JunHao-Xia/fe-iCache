@@ -66,9 +66,9 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import { GetAppNameList, GetAddressList, GetCacheNameList, GetCacheKeyList, GetCacheValue } from '../api/mockApi';
+import { GetAppNameList, GetAddressList, GetCacheNameList, GetCacheKeyList, GetCacheValue } from '../../api/mockApi';
 import { SelectProps } from "ant-design-vue";
-import JsonView from "../components/JsonView.vue";
+import JsonView from "../../components/JsonView/JsonView.vue";
 
 const defaultAppName = ref('AppName');
 const appName = ref("");

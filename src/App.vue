@@ -8,35 +8,55 @@
          <HomeOutlined/>
           <span><router-link to="/">Ocean</router-link></span>
         </a-menu-item>
-        <a-sub-menu key="sub1">
+        <a-sub-menu key="cache">
           <template #title>
               <span>
                 <PieChartOutlined/>
                 <span>Cache</span>
               </span>
           </template>
-          <a-menu-item key="/monitor">
-            <router-link to="/monitor">Cache Monitor</router-link>
+          <a-menu-item key="/cache/monitor/view">
+            <router-link to="/cache/monitor/view">Cache Monitor</router-link>
           </a-menu-item>
-          <a-menu-item key="/center">
-            <router-link to="/center">Cache Center</router-link>
+          <a-menu-item key="/cache/monitor/center">
+            <router-link to="/cache/monitor/center">Cache Center</router-link>
           </a-menu-item>
-          <a-menu-item key="/cron">
-            <router-link to="/cron">Cache Cron</router-link>
+          <a-menu-item key="/cache/monitor/cron">
+            <router-link to="/cache/monitor/cron">Cache Cron</router-link>
           </a-menu-item>
         </a-sub-menu>
-        <a-sub-menu key="sub2">
+        <a-sub-menu key="flowProcess">
+          <template #title>
+              <span>
+                <ShareAltOutlined/>
+                <span>FlowProcess</span>
+              </span>
+          </template>
+          <a-menu-item key="/flow/design">
+            <router-link to="/flow/design">
+              <EditOutlined/>
+              Flow Design
+            </router-link>
+          </a-menu-item>
+          <a-menu-item key="/flow/monitor">
+            <router-link to="/flow/monitor">
+              <ShareAltOutlined/>
+              Flow Monitor
+            </router-link>
+          </a-menu-item>
+        </a-sub-menu>
+        <a-sub-menu key="stateMachine">
           <template #title>
               <span>
                 <CodeOutlined/>
                 <span>StateMachine</span>
               </span>
           </template>
-          <a-menu-item key="/sdesign">
-            <router-link to="/design">State Design</router-link>
+          <a-menu-item key="/stateMachine/view">
+            <router-link to="/stateMachine/view">State Design</router-link>
           </a-menu-item>
-          <a-menu-item key="/smonitor">
-            <router-link to="/smonitor">State Monitor</router-link>
+          <a-menu-item key="/stateMachine/monitor">
+            <router-link to="/stateMachine/monitor">State Monitor</router-link>
           </a-menu-item>
         </a-sub-menu>
       </a-menu>
@@ -73,11 +93,13 @@ import {
   PieChartOutlined,
   CodeOutlined,
   HomeOutlined,
+ShareAltOutlined,
+  EditOutlined
 } from '@ant-design/icons-vue';
 
 import {RouterLink} from 'vue-router'
 import {ref} from 'vue';
-const collapsed = ref<boolean>(true);
+const collapsed = ref<boolean>(false);
 const selectedKeys = ref<string[]>(['1']);
 const value = ref<string>('');
 const onSearch = (searchValue: string) => {
