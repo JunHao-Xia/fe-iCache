@@ -66,7 +66,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import { GetAppNameList, GetAddressList, GetCacheNameList, GetCacheKeyList, GetCacheValue } from '../../api/mockApi';
+import { GetAppNameList, GetAddressList, GetCacheNameList, GetCacheKeyList, GetCacheValue } from '../../api/mockApi.js';
 import { SelectProps } from "ant-design-vue";
 import JsonView from "../../components/JsonView/JsonView.vue";
 

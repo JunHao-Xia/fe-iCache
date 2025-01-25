@@ -1,6 +1,11 @@
 <template>
   <div class="drawArea">
-    <div class="container" ref="container">
+    <div class="nodeArea">
+      节点选择区域
+    </div>
+    <div class="container" ref="container"> </div>
+    <div class="operateArea">
+      <a-button type="primary" @click="saveFlow" ghost>保存流程</a-button>
     </div>
   </div>
 </template>
@@ -14,23 +19,17 @@ import '@logicflow/extension/lib/style/index.css'
 import LogicFlow from "@logicflow/core";
 import {Highlight,DndPanel,Menu,Control,MiniMap,SelectionSelect,InsertNodeInPolyline,Snapshot } from '@logicflow/extension';
 
-//插件注册 方式1
-// LogicFlow.use(Snapshot);
-// LogicFlow.use(InsertNodeInPolyline);
-// LogicFlow.use(SelectionSelect);
-// LogicFlow.use(MiniMap);
-// LogicFlow.use(Menu);
-// LogicFlow.use(Control);
-// LogicFlow.use(DndPanel);
+//方法
+import {saveFlow} from '../../api/flowProcess.js';
 
 
 export default {
-
+  //初次加载时候 挂载
   mounted() {
+    //初始化
     this.lf = new LogicFlow({
       //插件注册 方式2
       plugins: [Highlight,DndPanel,Menu,Control,MiniMap,SelectionSelect,InsertNodeInPolyline,Snapshot],
-
       container: this.$refs.container,
       //是否显示网格
       grid: true,
@@ -44,6 +43,7 @@ export default {
       //对齐线 只有网格属性打开才能显示对齐线
       snapline: true
     });
+    //渲染加载
     this.lf.render();
     //自定义对齐线样式
     this.lf.setTheme({
@@ -108,18 +108,46 @@ export default {
     //设置高亮 path | single
     this.lf.extension.highlight.setMode('path');
   },
+  methods: {
+    //保存节点信息
+     saveFlow() {
+      this.gridData = this.lf.getGraphData();
+      try {
+         saveFlow(this.gridData).then(data => {
+           console.log(data);
+         })
+      } catch (error) {
+        console.error("请求失败，请检查网络或服务器状态", error);
+      }
+    },
+  },
 };
+
+
 </script>
 
 <style scoped>
 .drawArea {
   width: 100%;
-  height: 95%;
+  height: 90%;
   margin-top: 2%;
+  border: #333333 solid 1px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.nodeArea {
+  width: 20%;
+  height: 100%;
   border: #333333 solid 1px;
 }
 .container {
-  width: 100%;
+  width: 60%;
+  height: 100%;
+  border: #333333 solid 1px;
+}
+.operateArea {
+  width: 20%;
   height: 100%;
   border: #333333 solid 1px;
 }
