@@ -36,6 +36,8 @@ export default {
       try {
         const resp = await getProcessNodeList();
         this.businessNodeList = resp.data;
+        console.log('获取流程节点成功')
+        console.log(this.businessNodeList)
       } catch (error) {
         console.error('Error fetching node list:', error);
       }
@@ -80,32 +82,65 @@ export default {
          // saveFlow(this.gridData).then(data => {
          //   console.log(data);
          // })
-        toEL(this.gridData).then(data => {
+
+        this.transformFeToBe(this.gridData)
+        console.log("transBeObject")
+        console.log(this.beObject)
+        toEL(this.beObject).then(data => {
           console.log(data);
         })
+        this.beObject={
+          nodeEntities: [],
+          nodeEdges: []
+        };
 
       } catch (error) {
         console.error("请求失败，请检查网络或服务器状态", error);
       }
     },
 
-    fetchBusinessNodeList() {
-      try {
-        const resp =  getProcessNodeList();
-        resp.then(data => {
-          this.businessNodeList = data.data;
-        })
-      } catch (error) {
-        console.error('Error fetching node list:', error);
-        return [];
+    //对象转换方法
+    transformFeToBe(feObject) {
+      console.log("feObject")
+      console.log(feObject)
+      // 转换nodes到nodeEntities
+      if (feObject.nodes) {
+        feObject.nodes.forEach(node => {
+          this.beObject.nodeEntities.push({
+            id: node.id,
+            name: node.properties.name,
+            label: node.text.value,
+            nodeType: node.properties.type,
+            x: node.x,
+            y: node.y
+          });
+        });
+      }
+
+      // 转换edges到nodeEdges
+      if (feObject.edges) {
+        feObject.edges.forEach(edge => {
+          this.beObject.nodeEdges.push({
+            source: edge.sourceNodeId,
+            target: edge.targetNodeId,
+            ifNodeFlag: false, // 假设没有特殊需求
+            tag: '' // 可以根据需要设置
+          });
+        });
       }
     }
+
+
   },
   data() {
     return {
       gridData: {},
       lf: null,
-      businessNodeList: []
+      businessNodeList: [],
+      beObject : {
+        nodeEntities: [],
+        nodeEdges: []
+      },
     };
   },
 };
