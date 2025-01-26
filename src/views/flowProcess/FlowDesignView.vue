@@ -93,7 +93,6 @@ export default {
           nodeEntities: [],
           nodeEdges: []
         };
-
       } catch (error) {
         console.error("请求失败，请检查网络或服务器状态", error);
       }
@@ -101,8 +100,6 @@ export default {
 
     //对象转换方法
     transformFeToBe(feObject) {
-      console.log("feObject")
-      console.log(feObject)
       // 转换nodes到nodeEntities
       if (feObject.nodes) {
         feObject.nodes.forEach(node => {
@@ -120,12 +117,24 @@ export default {
       // 转换edges到nodeEdges
       if (feObject.edges) {
         feObject.edges.forEach(edge => {
+          let ifNodeFlag = false;
+          let tag = '';
+          if(edge.text !==undefined && edge.text !== null&& edge.text.value!==""){
+            if(edge.text.value!=="true" && edge.text.value!=="false"){
+              //switch 语句 设置 tag 才能判断
+              tag = edge.text.value;
+            }else {
+              //if 节点 需要设置 ifNodeFlag判断符号
+              ifNodeFlag = edge.text.value === "true";
+            }
+          }
           this.beObject.nodeEdges.push({
             source: edge.sourceNodeId,
             target: edge.targetNodeId,
-            ifNodeFlag: false, // 假设没有特殊需求
-            tag: '' // 可以根据需要设置
+            ifNodeFlag: ifNodeFlag, // 假设没有特殊需求
+            tag: tag // 可以根据需要设置
           });
+
         });
       }
     }
