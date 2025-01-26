@@ -1,8 +1,5 @@
 <template>
   <div class="drawArea">
-    <div class="nodeArea">
-      节点选择区域
-    </div>
     <div class="container" ref="container"> </div>
     <div class="operateArea">
       <a-button type="primary" @click="saveFlow" ghost>保存流程</a-button>
@@ -59,7 +56,7 @@ export default {
         //边类型 'line' | 'polyline' | 'bezier'
         edgeType: 'line',
         //对齐线 只有网格属性打开才能显示对齐线
-        snapline: true
+        snapline: true,
       });
       //渲染加载
       this.lf.render();
@@ -79,19 +76,26 @@ export default {
      saveFlow() {
       this.gridData = this.lf.getGraphData();
       try {
-         // saveFlow(this.gridData).then(data => {
-         //   console.log(data);
-         // })
-
         this.transformFeToBe(this.gridData)
         console.log("transBeObject")
         console.log(this.beObject)
-        toEL(this.beObject).then(data => {
-          console.log(data);
+
+        //清空画布
+        this.lf.clearData()
+
+        toEL(this.beObject).then(resp => {
+          if(resp!=null&&resp.data!==null){
+            console.log(resp)
+            const graphData = JSON.parse(resp.data);
+            //回显数据
+            this.lf.render(graphData);
+            this.lf.translateCenter();
+          }
         })
         this.beObject={
           nodeEntities: [],
-          nodeEdges: []
+          nodeEdges: [],
+          jsonData:''
         };
       } catch (error) {
         console.error("请求失败，请检查网络或服务器状态", error);
@@ -134,9 +138,10 @@ export default {
             ifNodeFlag: ifNodeFlag, // 假设没有特殊需求
             tag: tag // 可以根据需要设置
           });
-
         });
       }
+
+      this.beObject.jsonData = JSON.stringify(feObject);
     }
 
 
@@ -167,13 +172,8 @@ export default {
   justify-content: center;
   align-items: center;
 }
-.nodeArea {
-  width: 20%;
-  height: 100%;
-  border: #333333 solid 1px;
-}
 .container {
-  width: 60%;
+  width: 80%;
   height: 100%;
   border: #333333 solid 1px;
 }
