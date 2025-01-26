@@ -17,7 +17,7 @@ import LogicFlow from "@logicflow/core";
 import {Highlight,DndPanel,Menu,Control,MiniMap,SelectionSelect,InsertNodeInPolyline,Snapshot } from '@logicflow/extension';
 
 //方法
-import {saveFlow,getProcessNodeList,toEL} from '../../api/flowProcess.js';
+import {getProcessNodeList,save} from '../../api/flowProcess.js';
 
 
 export default {
@@ -83,7 +83,7 @@ export default {
         //清空画布
         this.lf.clearData()
 
-        toEL(this.beObject).then(resp => {
+        save(this.beObject).then(resp => {
           if(resp!=null&&resp.data!==null){
             console.log(resp)
             const graphData = JSON.parse(resp.data);

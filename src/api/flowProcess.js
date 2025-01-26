@@ -1,14 +1,8 @@
 import requestUtils from './http/request';
 
-export function saveFlow() {
+export function save(param) {
   return requestUtils.post({
-    url: '/flow/saveFlow'
-  })
-}
-export function toEL(param) {
-  console.log(param)
-  return requestUtils.post({
-    url: '/flow/toEl',
+    url: '/flow/save',
     data: param
   })
 }
