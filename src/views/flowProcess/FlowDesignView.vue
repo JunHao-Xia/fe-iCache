@@ -87,6 +87,7 @@ export default {
           if(resp!=null&&resp.data!==null){
             console.log(resp)
             const graphData = JSON.parse(resp.data);
+            console.log(JSON.parse(resp.data))
             //回显数据
             this.lf.render(graphData);
             this.lf.translateCenter();
