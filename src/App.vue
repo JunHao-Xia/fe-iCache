@@ -38,10 +38,10 @@
               Flow Design
             </router-link>
           </a-menu-item>
-          <a-menu-item key="/flow/monitor">
-            <router-link to="/flow/monitor">
+          <a-menu-item key="/flow/list">
+            <router-link to="/flow/list">
               <ShareAltOutlined/>
-              Flow Monitor
+              Flow List
             </router-link>
           </a-menu-item>
         </a-sub-menu>
