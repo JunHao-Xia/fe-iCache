@@ -1,37 +1,39 @@
 <template>
   <div class="flowList">
-    <a-table size="large" :columns="columns" :data-source="dataSource" bordered :row-class-name="(_record, index) => (index % 2 === 1 ? 'table-striped' : null)">
+    <a-table size="large" :columns="columns" :data-source="dataSource" bordered
+             :row-class-name="(_record, index) => (index % 2 === 1 ? 'table-striped' : null)">
       <template #headerCell="{ column }">
         <template v-if="column.key === 'title'">
         <span>
-          {{column.flowChainID}}
+          {{ column.id }}
         </span>
         </template>
       </template>
 
       <template #bodyCell="{ column, record }">
-        <template v-if="column.flowChainName === 'flowChainName'">
-          <a>
-            {{ record.flowChainName }}
-          </a>
+        <template v-if="column.key === 'chainName'">
+          {{ record.chainName }}
         </template>
-        <template v-else-if="column.key === 'tags'">
+        <template v-else-if="column.key === 'enable'">
         <span>
-          <a-tag
-              v-for="tag in record.tags"
-              :key="tag"
-              :color="tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'"
-          >
-            {{ tag.toUpperCase() }}
+           <a-space direction="vertical">
+            <a-switch :checked="record.enable===1" @change="handleEnableChange(record, $event)"/>
+            </a-space>
+        </span>
+        </template>
+        <template v-else-if="column.key === 'operators'">
+          <a-tag v-for="op in operator"
+                 :key="op"
+                 :color=" op==='查看流程'?'blue':'orange'"
+                 @click="clickRow(record,op)">
+           <span v-if="op === '查看流程'">
+              <SearchOutlined/>
+           </span>
+            <span v-if="op === '更新流程'">
+              <SettingOutlined/>
+           </span>
+            {{ op }}
           </a-tag>
-        </span>
-        </template>
-        <template v-else-if="column.key === 'action'">
-        <span>
-          <a>查看</a>
-          <a-divider type="vertical" />
-          <a>编辑</a>
-        </span>
         </template>
       </template>
     </a-table>
@@ -39,13 +41,13 @@
 </template>
 
 <script>
-import {getFlowChainList} from '../../api/flowProcess.js';
-import {SmileOutlined, DownOutlined} from '@ant-design/icons-vue';
+import {getFlowChainList, save, updateFlowChain} from '../../api/flowProcess.js';
+import {SmileOutlined, DownOutlined, SettingOutlined, SearchOutlined} from '@ant-design/icons-vue';
 
 export default {
   //注册组件
   components: {
-    SmileOutlined, DownOutlined
+    SmileOutlined, DownOutlined, SettingOutlined, SearchOutlined
   },
 
   //初始化
@@ -62,50 +64,34 @@ export default {
         pageSize: 10
       },
       flowChainListResponse: {},
-      columns:[
+      columns: [
         {
           title: '流程ID',
-          dataIndex: 'flowChainID',
-          key: 'flowChainID',
+          dataIndex: 'id',
+          key: 'id',
         },
         {
           title: '流程名称',
-          dataIndex: 'flowChainName',
-          flowChainName: 'flowChainName',
+          dataIndex: 'chainName',
+          key: 'chainName',
         },
         {
-          title: '业务名称',
-          dataIndex: 'bindingBiz',
-          key: 'bindingBiz',
+          title: '绑定业务',
+          dataIndex: 'applicationName',
+          key: 'applicationName',
         },
         {
-          title: '标签',
-          key: 'tags',
-          dataIndex: 'tags',
+          title: '流程状态',
+          key: 'enable',
+          dataIndex: 'enable',
         },
         {
-          title: '操作',
-          key: 'action',
+          title: '其他操作',
+          key: 'operators',
         },
       ],
-      dataSource: [{
-        flowChainID: '1',
-        flowChainName: '流程名称1',
-        bindingBiz: 'stock-lock',
-        tags: ['nice', 'developer'],
-      },
-        {
-          flowChainID: '2',
-          flowChainName: '流程名称2',
-          bindingBiz: 'stock-query',
-          tags: ['loser'],
-        },
-        {
-          flowChainID: '3',
-          flowChainName: '流程名称3',
-          bindingBiz: 'stock-sync',
-          tags: ['cool', 'teacher'],
-        },],
+      dataSource: [],
+      operator: ['查看流程', '更新流程'],
     };
   },
 
@@ -116,10 +102,37 @@ export default {
         const resp = await getFlowChainList(this.flowChainListRequest);
         this.flowChainListResponse = resp.data;
         console.log('获取流程列表成功')
+        console.log(resp.data)
+        this.dataSource = resp.data.records;
       } catch (error) {
         console.error('获取流程列表失败:', error);
       }
     },
+    handleEnableChange(record, checked) {
+      const param = {
+        id: record.id,
+        enable: checked ? 1 : 0
+      };
+      updateFlowChain(param).then(resp => {
+        if(resp!=null&&resp.data!==null){
+          record.enable =resp.data.enable;
+        }
+      })
+
+    },
+    clickRow(record, operatorType) {
+      console.log(record)
+      console.log(operatorType)
+      // this.$router.push({
+      //   path: '/flowProcess/flowDesign',
+      //   query: {
+      //     chainId: record.id,
+      //     chainName: record.chainName,
+      //     applicationName: record.applicationName,
+      //     state: record.state
+      //   }
+      // });
+    }
   },
 };
 
@@ -136,6 +149,7 @@ export default {
 [data-doc-theme='light'] .ant-table-striped :deep(.table-striped) td {
   background-color: #fafafa;
 }
+
 [data-doc-theme='dark'] .ant-table-striped :deep(.table-striped) td {
   background-color: rgb(29, 29, 29);
 }
