@@ -32,16 +32,16 @@
                 <span>FlowProcess</span>
               </span>
           </template>
-          <a-menu-item key="/flow/design">
-            <router-link to="/flow/design">
-              <EditOutlined/>
-              Flow Design
-            </router-link>
-          </a-menu-item>
           <a-menu-item key="/flow/list">
             <router-link to="/flow/list">
               <ShareAltOutlined/>
               Flow List
+            </router-link>
+          </a-menu-item>
+          <a-menu-item key="/flow/design">
+            <router-link to="/flow/design">
+              <EditOutlined/>
+              Flow Design
             </router-link>
           </a-menu-item>
         </a-sub-menu>
@@ -80,9 +80,6 @@
           <router-view></router-view>
         </div>
       </a-layout-content>
-<!--      <a-layout-footer style="text-align: center">-->
-<!--        Power By Potential Space-->
-<!--      </a-layout-footer>-->
     </a-layout>
   </a-layout>
 </template>

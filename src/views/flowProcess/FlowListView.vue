@@ -24,12 +24,12 @@
         <template v-else-if="column.key === 'operators'">
           <a-tag v-for="op in operator"
                  :key="op"
-                 :color=" op==='查看流程'?'blue':'orange'"
+                 :color=" op==='查看流程'?'blue':'green'"
                  @click="clickRow(record,op)">
            <span v-if="op === '查看流程'">
               <SearchOutlined/>
            </span>
-            <span v-if="op === '更新流程'">
+            <span v-if="op === '编辑流程'">
               <SettingOutlined/>
            </span>
             {{ op }}
@@ -38,11 +38,36 @@
       </template>
     </a-table>
   </div>
+  <div>
+    <a-modal
+        v-model:open="modalQueryOpen"
+        title="Basic Modal"
+        width="100%"
+        @ok="modalHandleOk"
+        wrap-class-name="full-modal"
+    >
+      <div class="container" ref="container"> </div>
+    </a-modal>
+  </div>
 </template>
 
 <script>
-import {getFlowChainList, save, updateFlowChain} from '../../api/flowProcess.js';
+//样式
+import "@logicflow/core/dist/style/index.css";
+import '@logicflow/extension/lib/style/index.css'
+import {getFlowChainList, updateFlowChain} from '../../api/flowProcess.js';
 import {SmileOutlined, DownOutlined, SettingOutlined, SearchOutlined} from '@ant-design/icons-vue';
+import LogicFlow from "@logicflow/core";
+import {
+  Control,
+  DndPanel,
+  Highlight,
+  InsertNodeInPolyline,
+  Menu,
+  MiniMap,
+  SelectionSelect,
+  Snapshot
+} from "@logicflow/extension";
 
 export default {
   //注册组件
@@ -55,7 +80,6 @@ export default {
     this.loadData().then(() => {
     });
   },
-
   //全局参数
   data() {
     return {
@@ -91,7 +115,10 @@ export default {
         },
       ],
       dataSource: [],
-      operator: ['查看流程', '更新流程'],
+      operator: ['查看流程', '编辑流程'],
+      modalQueryOpen: false,
+      selectedQueryRecord: {},
+      lf: {},
     };
   },
 
@@ -102,7 +129,6 @@ export default {
         const resp = await getFlowChainList(this.flowChainListRequest);
         this.flowChainListResponse = resp.data;
         console.log('获取流程列表成功')
-        console.log(resp.data)
         this.dataSource = resp.data.records;
       } catch (error) {
         console.error('获取流程列表失败:', error);
@@ -121,18 +147,46 @@ export default {
 
     },
     clickRow(record, operatorType) {
-      console.log(record)
-      console.log(operatorType)
-      // this.$router.push({
-      //   path: '/flowProcess/flowDesign',
-      //   query: {
-      //     chainId: record.id,
-      //     chainName: record.chainName,
-      //     applicationName: record.applicationName,
-      //     state: record.state
-      //   }
-      // });
-    }
+      if(operatorType==='查看流程'){
+        this.modalQueryOpen = true;
+        this.selectedQueryRecord = record;
+        const graphData = JSON.parse(record.jsonData);
+        //回显数据
+        this.setLogicFlowData(graphData);
+      }
+    },
+    modalHandleOk() {
+      this.modalQueryOpen = false;
+    },
+    setLogicFlowData(graphData) {
+      if (this.lf) {
+        this.initLogicFlow()
+        this.lf.render(graphData);
+      }
+    },
+    initLogicFlow() {
+      //初始化
+      this.lf = new LogicFlow({
+        plugins: [Highlight,DndPanel,Menu,Control,MiniMap,SelectionSelect,InsertNodeInPolyline,Snapshot],
+        container: this.$refs.container,
+        grid: true,
+        stopMoveGraph: true,
+        keyboard: {
+          enabled: true,
+        },
+        edgeType: 'line',
+        snapline: true,
+      });
+      this.lf.render()
+      this.lf.setTheme({
+        snapline: {
+          stroke: '#1E90FF', // 对齐线颜色
+          strokeWidth: 1, // 对齐线宽度
+        },
+      })
+      this.lf.extension.selectionSelect.openSelectionSelect();
+      this.lf.extension.selectionSelect.setSelectionSense(true, true);
+    },
   },
 };
 
@@ -142,7 +196,7 @@ export default {
 <style scoped>
 .flowList {
   width: 100%;
-  height: 90%;
+  height: 100%;
   margin-top: 2%;
 }
 
@@ -152,5 +206,30 @@ export default {
 
 [data-doc-theme='dark'] .ant-table-striped :deep(.table-striped) td {
   background-color: rgb(29, 29, 29);
+}
+
+.full-modal {
+  .ant-modal {
+    max-width: 100%;
+    top: 0;
+    padding-bottom: 0;
+    margin: 0;
+    height: 100vh; /* 设置模态框高度为视口高度 */
+  }
+  .ant-modal-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* 设置内容高度为100% */
+  }
+  .ant-modal-body {
+    flex: 1; /* 使主体内容占据剩余空间 */
+    padding: 0; /* 可选：去除默认内边距 */
+  }
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  border: #333333 solid 1px;
 }
 </style>

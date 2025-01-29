@@ -5,6 +5,7 @@ import MonitorView from "../views/cahceMonitor/MonitorView.vue";
 import MonitorCenter from "../views/cahceMonitor/MonitorCenter.vue";
 import FlowDesignView from "../views/flowProcess/FlowDesignView.vue";
 import FlowListView from "../views/flowProcess/FlowListView.vue";
+import FlowQueryDetailView from "../views/flowProcess/FlowQueryDetail.vue";
 
 const routes = [
     { path: '/', component: HomeView },
@@ -12,6 +13,7 @@ const routes = [
     { path: '/cache/monitor/center', component: MonitorCenter },
     { path: '/flow/design', component: FlowDesignView },
     { path: '/flow/list', component: FlowListView},
+    { path: '/flow/query/detail', component: FlowQueryDetailView},
 ]
 
 const router = createRouter({
