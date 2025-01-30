@@ -13,7 +13,11 @@ const routes = [
     { path: '/cache/monitor/center', component: MonitorCenter },
     { path: '/flow/design', component: FlowDesignView },
     { path: '/flow/list', component: FlowListView},
-    { path: '/flow/query/detail', component: FlowQueryDetailView},
+    {
+        path: '/flow/query/detail/:record',
+        name: 'flowQueryDetail',
+        component: FlowQueryDetailView
+    },
 ]
 
 const router = createRouter({
