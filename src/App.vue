@@ -38,8 +38,8 @@
               Flow List
             </router-link>
           </a-menu-item>
-          <a-menu-item key="/flow/design">
-            <router-link to="/flow/design">
+          <a-menu-item key="/flow/create">
+            <router-link to="/flow/create">
               <EditOutlined/>
               Flow Design
             </router-link>
