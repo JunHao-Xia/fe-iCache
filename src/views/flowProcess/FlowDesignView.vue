@@ -166,8 +166,7 @@ export default {
 <style scoped>
 .drawArea {
   width: 100%;
-  height: 90%;
-  margin-top: 2%;
+  height: 100%;
   border: #333333 solid 1px;
   display: flex;
   justify-content: center;
