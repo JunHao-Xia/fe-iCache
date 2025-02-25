@@ -19,6 +19,12 @@ export function updateFlowChain(param) {
     data: param
   })
 }
+export function updateFlowChainStatus(param) {
+  return requestUtils.post({
+    url: '/flow/chain/updateFlowChainStatus',
+    data: param
+  })
+}
 
 
 export function getProcessNodeList() {

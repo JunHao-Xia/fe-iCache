@@ -44,7 +44,7 @@
 //样式
 import "@logicflow/core/dist/style/index.css";
 import '@logicflow/extension/lib/style/index.css'
-import {getFlowChainList, updateFlowChain} from '../../../api/flowProcess.js';
+import {getFlowChainList, updateFlowChain, updateFlowChainStatus} from '../../../api/flowProcess.js';
 import {SmileOutlined, DownOutlined, SettingOutlined, SearchOutlined} from '@ant-design/icons-vue';
 
 export default {
@@ -117,7 +117,7 @@ export default {
         id: record.id,
         enable: checked ? 1 : 0
       };
-      updateFlowChain(param).then(resp => {
+      updateFlowChainStatus(param).then(resp => {
         if (resp != null && resp.data !== null) {
           record.enable = resp.data.enable;
         }
