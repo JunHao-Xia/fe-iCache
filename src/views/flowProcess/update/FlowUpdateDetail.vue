@@ -1,6 +1,21 @@
 <template>
-  <div class="container" ref="container"></div>
-  <a-button type="primary" @click="updateFlow" ghost>修改流程</a-button>
+  <div class="drawAreaUpdate">
+    <div class="containerUpdate" ref="container"> </div>
+    <div class="operateAreaUpdate">
+      <h1>流程详情信息</h1>
+      <br>
+      <a-input v-model:value="this.beObjectUpdate.applicationName" placeholder="请输入流程挂载的服务名称" />
+      <br>
+      <br>
+      <a-input v-model:value="this.beObjectUpdate.chainName" placeholder="请输入流程名称" />
+      <br>
+      <br>
+      <a-textarea v-model:value="this.beObjectUpdate.chainDesc" placeholder="请输入流程描述" :rows="4" />
+      <br>
+      <br>
+      <a-button type="primary" @click="updateFlow" ghost>修改流程</a-button>
+    </div>
+  </div>
 </template>
 <script>
 //样式
@@ -69,6 +84,7 @@ export default {
       this.lf.extension.selectionSelect.setSelectionSense(false, false);
       this.lf.extension.dndPanel.setPatternItems(this.businessNodeList);
       this.settingGraphData()
+      this.loadFLowChainUpdateInfo()
     },
     //渲染图数据
     settingGraphData() {
@@ -82,6 +98,12 @@ export default {
         console.log(this.rowData)
       }
     },
+    loadFLowChainUpdateInfo(){
+      this.beObjectUpdate.id = this.rowData.id;
+      this.beObjectUpdate.applicationName = this.rowData.applicationName;
+      this.beObjectUpdate.chainName = this.rowData.chainName;
+      this.beObjectUpdate.chainDesc = this.rowData.chainDesc;
+    },
     //修改流程方法
     updateFlow() {
       this.gridData = this.lf.getGraphData();
@@ -92,11 +114,6 @@ export default {
         console.log(this.beObjectUpdate)
 
         //构建updateFlowChain方法需要的参数
-        this.beObjectUpdate.id = this.rowData.id;
-        this.beObjectUpdate.chainName = this.rowData.chainName;
-        this.beObjectUpdate.applicationName = this.rowData.applicationName;
-        this.beObjectUpdate.chainDesc = this.rowData.chainDesc;
-        this.beObjectUpdate.enable = this.rowData.enable;
         this.beObjectUpdate.jsonData = JSON.stringify(this.gridData);
         console.log(this.beObjectUpdate)
 
@@ -113,6 +130,9 @@ export default {
             //回显数据
             this.lf.render(graphData);
             this.lf.translateCenter();
+            this.beObjectUpdate.applicationName = resp.data.applicationName;
+            this.beObjectUpdate.chainName = resp.data.chainName;
+            this.beObjectUpdate.chainDesc = resp.data.chainDesc;
           }
         })
         //清空对象
@@ -186,13 +206,23 @@ export default {
 }}
 </script>
 <style scoped>
-.container {
+.drawAreaUpdate {
   width: 100%;
-  height: 90%;
+  height: 95%;
   margin-top: 2%;
   border: #333333 solid 1px;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.containerUpdate {
+  width: 80%;
+  height: 100%;
+  border: #333333 solid 1px;
+}
+.operateAreaUpdate {
+  width: 20%;
+  height: 100%;
+  border: #333333 solid 1px;
 }
 </style>
