@@ -1,5 +1,20 @@
 <template>
-  <div class="container" ref="container"></div>
+  <div class="drawAreaDetail">
+    <div class="containerDetail" ref="container"> </div>
+    <div class="operateAreaDetail">
+      <h1>流程详情信息</h1>
+      <br>
+      <a-input v-model:value="this.rowData.applicationName" placeholder="请输入流程挂载的服务名称" />
+      <br>
+      <br>
+      <a-input v-model:value="this.rowData.chainName" placeholder="请输入流程名称" />
+      <br>
+      <br>
+      <a-textarea v-model:value="this.rowData.chainDesc" placeholder="请输入流程描述" :rows="4" />
+      <br>
+      <br>
+    </div>
+  </div>
 </template>
 <script>
 //样式
@@ -52,35 +67,53 @@ export default {
       this.lf.extension.selectionSelect.openSelectionSelect();
       this.lf.extension.selectionSelect.setSelectionSense(false, false);
       this.settingGraphData()
+      //this.loadFLowChainUpdateInfo()
     },
     settingGraphData() {
       if (this.$route.params.record) {
-        const record = JSON.parse(this.$route.params.record);
-        console.log(record)
+        this.rowData = JSON.parse(this.$route.params.record);
+        console.log(this.rowData)
         //渲染加载
-        const graphData = JSON.parse(record.jsonData);
+        const graphData = JSON.parse(this.rowData.jsonData);
         this.lf.render(graphData);
         this.lf.translateCenter();
       }
     },
+    // loadFLowChainUpdateInfo(){
+    //   this.beObjectUpdate.id = this.rowData.id;
+    //   this.beObjectUpdate.applicationName = this.rowData.applicationName;
+    //   this.beObjectUpdate.chainName = this.rowData.chainName;
+    //   this.beObjectUpdate.chainDesc = this.rowData.chainDesc;
+    // },
   },
   data() {
     return {
       gridData: {},
       lf: null,
+      rowData:{},
     };
   },
 };
 
 </script>
 <style scoped>
-.container {
+.drawAreaDetail {
   width: 100%;
-  height: 90%;
+  height: 95%;
   margin-top: 2%;
   border: #333333 solid 1px;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.containerDetail {
+  width: 80%;
+  height: 100%;
+  border: #333333 solid 1px;
+}
+.operateAreaDetail {
+  width: 20%;
+  height: 100%;
+  border: #333333 solid 1px;
 }
 </style>
