@@ -1,4 +1,4 @@
-const baseUrl = "http://localhost:8686";
+const baseUrl = "http://localhost:8376";
 
 export default {
     baseUrl

@@ -44,7 +44,7 @@
 //样式
 import "@logicflow/core/dist/style/index.css";
 import '@logicflow/extension/lib/style/index.css'
-import {getFlowChainList, updateFlowChain} from '../../api/flowProcess.js';
+import {getFlowChainList, updateFlowChain} from '../../../api/flowProcess.js';
 import {SmileOutlined, DownOutlined, SettingOutlined, SearchOutlined} from '@ant-design/icons-vue';
 
 export default {
@@ -128,6 +128,11 @@ export default {
       if (operatorType === '查看流程') {
         this.$router.push({
           name: 'flowQueryDetail',
+          params: { record: JSON.stringify(record) }
+        });
+      }else if (operatorType === '编辑流程') {
+        this.$router.push({
+          name: 'flowGraphDetail',
           params: { record: JSON.stringify(record) }
         });
       }

@@ -2,6 +2,17 @@
   <div class="drawArea">
     <div class="container" ref="container"> </div>
     <div class="operateArea">
+      <h1>输入流程信息</h1>
+      <br>
+      <a-input v-model:value="this.beObject.applicationName" placeholder="请输入流程挂载的服务名称" />
+      <br>
+      <br>
+      <a-input v-model:value="this.beObject.chainName" placeholder="请输入流程名称" />
+      <br>
+      <br>
+      <a-textarea v-model:value="this.beObject.chainDesc" placeholder="请输入流程描述" :rows="4" />
+      <br>
+      <br>
       <a-button type="primary" @click="saveFlow" ghost>保存流程</a-button>
     </div>
   </div>
@@ -17,7 +28,7 @@ import LogicFlow from "@logicflow/core";
 import {Highlight,DndPanel,Menu,Control,MiniMap,SelectionSelect,InsertNodeInPolyline,Snapshot } from '@logicflow/extension';
 
 //方法
-import {getProcessNodeList,save} from '../../api/flowProcess.js';
+import {getProcessNodeList,save} from '../../../api/flowProcess.js';
 
 
 export default {
@@ -85,12 +96,16 @@ export default {
 
         save(this.beObject).then(resp => {
           if(resp!=null&&resp.data!==null){
-            console.log(resp)
-            const graphData = JSON.parse(resp.data);
-            console.log(JSON.parse(resp.data))
+            console.log("流程创建成功")
+            console.log(resp.data)
+            const graphData = JSON.parse(resp.data.jsonData);
+            console.log(graphData)
             //回显数据
             this.lf.render(graphData);
             this.lf.translateCenter();
+            this.beObject.applicationName = resp.data.applicationName;
+            this.beObject.chainName = resp.data.chainName;
+            this.beObject.chainDesc = resp.data.chainDesc;
           }
         })
         this.beObject={
@@ -154,7 +169,12 @@ export default {
       businessNodeList: [],
       beObject : {
         nodeEntities: [],
-        nodeEdges: []
+        nodeEdges: [],
+        jsonData:'',
+        chainName: '',
+        applicationName: '',
+        chainDesc: '',
+        enable: 0
       },
     };
   },
