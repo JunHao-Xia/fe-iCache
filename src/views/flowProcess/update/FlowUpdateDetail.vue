@@ -103,6 +103,7 @@ export default {
       this.beObjectUpdate.applicationName = this.rowData.applicationName;
       this.beObjectUpdate.chainName = this.rowData.chainName;
       this.beObjectUpdate.chainDesc = this.rowData.chainDesc;
+      this.beObjectUpdate.enable = this.rowData.enable;
     },
     //修改流程方法
     updateFlow() {
@@ -130,6 +131,7 @@ export default {
             //回显数据
             this.lf.render(graphData);
             this.lf.translateCenter();
+            this.beObjectUpdate.id = resp.data.id;
             this.beObjectUpdate.applicationName = resp.data.applicationName;
             this.beObjectUpdate.chainName = resp.data.chainName;
             this.beObjectUpdate.chainDesc = resp.data.chainDesc;
