@@ -97,6 +97,8 @@ export default {
       modalQueryOpen: false,
       selectedQueryRecord: {},
       lf: {},
+      allNodeInfo: {},
+      nodeEntities: [],
     };
   },
 
@@ -113,16 +115,47 @@ export default {
       }
     },
     handleEnableChange(record, checked) {
+      this.allNodeInfo =JSON.parse(record.allNodeInfo);
+      this.getNodeEntities(record.jsonData)
       const param = {
         id: record.id,
-        enable: checked ? 1 : 0
+        enable: checked ? 1 : 0,
+        nodeEntities: this.nodeEntities,
       };
+      console.log(record)
       updateFlowChainStatus(param).then(resp => {
         if (resp != null && resp.data !== null) {
           record.enable = resp.data.enable;
         }
       })
 
+    },
+    getNodeEntities(json){
+      const feObject = JSON.parse(json);
+      if (feObject.nodes) {
+        feObject.nodes.forEach(node => {
+          const dynamicParams = {};
+          console.log('this.allNodeInfo', this.allNodeInfo)
+          if (this.allNodeInfo[this.getTinyNodeId(node.id)]) {
+            const currentNodeInfo = this.allNodeInfo[this.getTinyNodeId(node.id)]
+            const dynamicParamsArray =currentNodeInfo.dynamicParams
+            if (dynamicParamsArray && dynamicParamsArray.length > 0) {
+              dynamicParamsArray.forEach(param => {
+                dynamicParams[param.paramName] = param.paramValue;
+              })
+            }
+          }
+          this.nodeEntities.push({
+            id: node.id,
+            name: node.properties.name,
+            label: node.text.value,
+            nodeType: node.properties.type,
+            dynamicParams: dynamicParams,
+            x: node.x,
+            y: node.y,
+          });
+        });
+      }
     },
     clickRow(record, operatorType) {
       if (operatorType === '查看流程') {
@@ -136,6 +169,10 @@ export default {
           params: { record: JSON.stringify(record) }
         });
       }
+    },
+    getTinyNodeId(nodeId){
+      const parts = nodeId.split('-'); // 按-分割成数组
+      return parts.slice(0, 2).join(''); // 取前两个部分并用-连接
     },
   },
 };

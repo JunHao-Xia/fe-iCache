@@ -26,9 +26,14 @@ export function updateFlowChainStatus(param) {
   })
 }
 
+//node相关
 
 export function getProcessNodeList() {
   return requestUtils.get({
     url: '/flow/node/getFlowNodeList'
+  })
+}export function getBizServiceList() {
+  return requestUtils.get({
+    url: '/flow/node/getBizServiceList'
   })
 }
