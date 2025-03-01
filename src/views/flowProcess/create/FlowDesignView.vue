@@ -14,9 +14,6 @@
       <a-textarea v-model:value="this.beObject.chainDesc" placeholder="请输入流程描述" :rows="4"/>
       <br>
       <br>
-      <a-button type="primary" @click="saveFlow" ghost>保存流程</a-button>
-      <br>
-      <br>
       <h1>当前节点信息</h1>
       <br>
       <a-form
@@ -79,14 +76,11 @@
                 添加参数
               </a-button>
             </a-form-item>
+            <a-button type="primary" @click="saveFlow" ghost>保存流程</a-button>
           </a-form>
-
         </a-form-item>
-        <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-          <a-button type="primary" @click="saveNodeInfo(this.currentNodeInfo)" ghost>保存节点信息</a-button>
-        </a-form-item>
-
       </a-form>
+
     </div>
   </div>
 </template>

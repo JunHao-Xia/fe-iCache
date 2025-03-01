@@ -13,7 +13,73 @@
       <a-textarea v-model:value="this.beObjectUpdate.chainDesc" placeholder="请输入流程描述" :rows="4" />
       <br>
       <br>
-      <a-button type="primary" @click="updateFlow" ghost>修改流程</a-button>
+      <h1>当前节点信息</h1>
+      <br>
+      <a-form
+          :model="this.currentNodeInfo"
+          name="basic"
+          :label-col="{ span: 5 }"
+          :wrapper-col="{ span: 17 }"
+          autocomplete="off"
+      >
+        <a-form-item
+            label="节点名称:"
+            name="NodeName"
+        >
+          <a-input disabled v-model:value="this.currentNodeInfo.name"/>
+        </a-form-item>
+
+        <a-form-item
+            label="节点类名:"
+            name="NodeClassName"
+        >
+          <a-input disabled v-model:value="this.currentNodeInfo.className"/>
+        </a-form-item>
+        <a-form-item label="节点类型:" name="NodeType">
+          <a-input disabled v-model:value="this.currentNodeInfo.type"/>
+        </a-form-item>
+
+        <a-form-item
+            label="节点参数:"
+            name="NodeParam"
+        >
+          <a-form
+              ref="formRef"
+              name="dynamic_form_nest_item"
+              :model="this.currentNodeInfo"
+          >
+            <a-space
+                v-for="(param, index) in this.currentNodeInfo.dynamicParams"
+                style="display: flex; margin-bottom: 5px"
+                align="baseline"
+            >
+              <a-form-item
+                  :name="['dynamicParams', index, 'paramName']"
+                  :rules="{required: false,message: 'Missing param name',}"
+              >
+                <a-input v-model:value="param.paramName" placeholder="Param Name"/>
+              </a-form-item>
+              :
+              <a-form-item
+                  :name="['dynamicParams', index, 'paramValue']"
+                  :rules="{required: false,message: 'Missing param value',}"
+              >
+                <a-input v-model:value="param.paramValue" placeholder="Param Value"/>
+              </a-form-item>
+
+              <MinusCircleOutlined @click="removeParam(param)"/>
+            </a-space>
+            <a-form-item>
+              <a-button type="dashed" block @click="addParam">
+                <PlusOutlined/>
+                添加参数
+              </a-button>
+            </a-form-item>
+            <a-button type="primary" @click="updateFlow" ghost>修改流程</a-button>
+          </a-form>
+        </a-form-item>
+      </a-form>
+
     </div>
   </div>
 </template>
@@ -33,8 +99,10 @@ import {
   Snapshot
 } from "@logicflow/extension";
 import {getProcessNodeList, updateFlowChain} from "../../../api/flowProcess.js";
+import {MinusCircleOutlined, PlusOutlined} from "@ant-design/icons-vue";
 
 export default {
+  components: {PlusOutlined, MinusCircleOutlined},
 
   //初次加载时候 挂载
   mounted() {
@@ -83,6 +151,20 @@ export default {
       this.lf.extension.selectionSelect.openSelectionSelect();
       this.lf.extension.selectionSelect.setSelectionSense(false, false);
       this.lf.extension.dndPanel.setPatternItems(this.businessNodeList);
+      //节点被单击
+      this.lf.on("node:click", (data) => {
+        this.currentNodeInfo =this.getNodeInfoByNodeId(data.data.id)
+      });
+
+      //节点被添加
+      this.lf.on("node:dnd-add", (data) => {
+        const nodeInfo = this.createNodeInfo(data);
+        this.putToAllNodeInfo(nodeInfo)
+      });
+      // 节点被删除
+      this.lf.on("node:delete", (data) => {
+        this.removeNodeByNode(data)
+      });
       this.settingGraphData()
       this.loadFLowChainUpdateInfo()
     },
@@ -96,6 +178,7 @@ export default {
         this.lf.translateCenter();
         console.log('渲染流程图成功')
         console.log(this.rowData)
+        this.allNodeInfo = JSON.parse(this.rowData.allNodeInfo);
       }
     },
     loadFLowChainUpdateInfo(){
@@ -116,6 +199,7 @@ export default {
 
         //构建updateFlowChain方法需要的参数
         this.beObjectUpdate.jsonData = JSON.stringify(this.gridData);
+        this.beObjectUpdate.allNodeInfo = JSON.stringify(this.allNodeInfo);
         console.log(this.beObjectUpdate)
 
         //清空画布
@@ -141,7 +225,7 @@ export default {
         this.beObjectUpdate={
           nodeEntities: [],
           nodeEdges: [],
-          jsonData:''
+          jsonData:'',
         };
       } catch (error) {
         console.error("请求失败，请检查网络或服务器状态", error);
@@ -185,7 +269,44 @@ export default {
           });
         });
       }
-    }
+    },
+    removeParam(item) {
+      const index = this.currentNodeInfo.dynamicParams.indexOf(item);
+      if (index !== -1) {
+        this.currentNodeInfo.dynamicParams.splice(index, 1);
+      }
+    },
+    addParam() {
+      this.currentNodeInfo.dynamicParams.push({
+        paramName: '',
+        paramValue: '',
+      });
+    },
+    createNodeInfo(data) {
+      return {
+        id: data.data.id,
+        name: data.data.text.value,
+        className: data.data.properties.name,
+        type: data.data.properties.type,
+        dynamicParams:[],
+      };
+    },
+    putToAllNodeInfo(nodeInfo){
+      const nodeId = this.getTinyNodeId(nodeInfo.id)
+      this.allNodeInfo[nodeId] = nodeInfo
+    },
+    removeNodeByNode(nodeInfo){
+      const nodeId = this.getTinyNodeId(nodeInfo.data.id)
+      delete this.allNodeInfo[nodeId]
+    },
+    getNodeInfoByNodeId(nodeIdOrigin){
+      const nodeId = this.getTinyNodeId(nodeIdOrigin)
+      return this.allNodeInfo[nodeId]
+    },
+    getTinyNodeId(nodeId){
+      const parts = nodeId.split('-'); // 按-分割成数组
+      return parts.slice(0, 2).join(''); // 取前两个部分并用-连接
+    },
   },
   data() {
     return {
@@ -197,6 +318,7 @@ export default {
         nodeEntities: [],
         nodeEdges: [],
         jsonData:'',
+        allNodeInfo:'',
         id: 0,
         chainName: '',
         applicationName: '',
@@ -204,6 +326,8 @@ export default {
         elData: '',
         enable: 0
       },
+      allNodeInfo:{},
+      currentNodeInfo: {},
     }
 }}
 </script>
@@ -218,12 +342,12 @@ export default {
   align-items: center;
 }
 .containerUpdate {
-  width: 80%;
+  width: 70%;
   height: 100%;
   border: #333333 solid 1px;
 }
 .operateAreaUpdate {
-  width: 20%;
+  width: 30%;
   height: 100%;
   border: #333333 solid 1px;
 }
