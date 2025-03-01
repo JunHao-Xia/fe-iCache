@@ -4,15 +4,76 @@
     <div class="operateAreaDetail">
       <h1>流程详情信息</h1>
       <br>
-      <a-input v-model:value="this.rowData.applicationName" placeholder="请输入流程挂载的服务名称" />
+      <a-input disabled v-model:value="this.rowData.applicationName" placeholder="请输入流程挂载的服务名称" />
       <br>
       <br>
-      <a-input v-model:value="this.rowData.chainName" placeholder="请输入流程名称" />
+      <a-input disabled v-model:value="this.rowData.chainName" placeholder="请输入流程名称" />
       <br>
       <br>
-      <a-textarea v-model:value="this.rowData.chainDesc" placeholder="请输入流程描述" :rows="4" />
+      <a-textarea disabled v-model:value="this.rowData.chainDesc" placeholder="请输入流程描述" :rows="4" />
       <br>
       <br>
+      <br>
+      <br>
+      <h1>当前节点信息</h1>
+      <br>
+      <a-form
+          :model="this.currentNodeInfo"
+          name="basic"
+          :label-col="{ span: 5 }"
+          :wrapper-col="{ span: 17 }"
+          autocomplete="off"
+      >
+        <a-form-item
+            label="节点名称:"
+            name="NodeName"
+        >
+          <a-input disabled v-model:value="this.currentNodeInfo.name"/>
+        </a-form-item>
+
+        <a-form-item
+            label="节点类名:"
+            name="NodeClassName"
+        >
+          <a-input disabled v-model:value="this.currentNodeInfo.className"/>
+        </a-form-item>
+        <a-form-item label="节点类型:" name="NodeType">
+          <a-input disabled v-model:value="this.currentNodeInfo.type"/>
+        </a-form-item>
+
+        <a-form-item
+            label="节点参数:"
+            name="NodeParam"
+        >
+          <a-form
+              ref="formRef"
+              name="dynamic_form_nest_item"
+              :model="this.currentNodeInfo"
+          >
+            <a-space
+                v-for="(param, index) in this.currentNodeInfo.dynamicParams"
+                style="display: flex; margin-bottom: 5px"
+                align="baseline"
+            >
+              <a-form-item
+                  :name="['dynamicParams', index, 'paramName']"
+                  :rules="{required: false,message: 'Missing param name',}"
+              >
+                <a-input disabled v-model:value="param.paramName" placeholder="Param Name"/>
+              </a-form-item>
+              :
+              <a-form-item
+                  :name="['dynamicParams', index, 'paramValue']"
+                  :rules="{required: false,message: 'Missing param value',}"
+              >
+                <a-input disabled v-model:value="param.paramValue" placeholder="Param Value"/>
+              </a-form-item>
+            </a-space>
+          </a-form>
+
+        </a-form-item>
+      </a-form>
+
     </div>
   </div>
 </template>
@@ -31,8 +92,10 @@ import {
   SelectionSelect,
   Snapshot
 } from "@logicflow/extension";
+import {MinusCircleOutlined, PlusOutlined} from "@ant-design/icons-vue";
 
 export default {
+  components: {PlusOutlined, MinusCircleOutlined},
   //初次加载时候 挂载
   mounted() {
       this.init();
@@ -67,7 +130,10 @@ export default {
       this.lf.extension.selectionSelect.openSelectionSelect();
       this.lf.extension.selectionSelect.setSelectionSense(false, false);
       this.settingGraphData()
-      //this.loadFLowChainUpdateInfo()
+      //节点被单击
+      this.lf.on("node:click", (data) => {
+        this.currentNodeInfo =this.getNodeInfoByNodeId(data.data.id)
+      });
     },
     settingGraphData() {
       if (this.$route.params.record) {
@@ -77,20 +143,28 @@ export default {
         const graphData = JSON.parse(this.rowData.jsonData);
         this.lf.render(graphData);
         this.lf.translateCenter();
+        this.allNodeInfo = JSON.parse(this.rowData.allNodeInfo);
       }
     },
-    // loadFLowChainUpdateInfo(){
-    //   this.beObjectUpdate.id = this.rowData.id;
-    //   this.beObjectUpdate.applicationName = this.rowData.applicationName;
-    //   this.beObjectUpdate.chainName = this.rowData.chainName;
-    //   this.beObjectUpdate.chainDesc = this.rowData.chainDesc;
-    // },
+    saveNodeInfo(currentNodeInfo) {
+      console.log('currentNodeInfo:', currentNodeInfo);
+    },
+    getNodeInfoByNodeId(nodeIdOrigin){
+      const nodeId = this.getTinyNodeId(nodeIdOrigin)
+      return this.allNodeInfo[nodeId]
+    },
+    getTinyNodeId(nodeId){
+      const parts = nodeId.split('-'); // 按-分割成数组
+      return parts.slice(0, 2).join(''); // 取前两个部分并用-连接
+    },
   },
   data() {
     return {
       gridData: {},
       lf: null,
       rowData:{},
+      allNodeInfo:{},
+      currentNodeInfo: {},
     };
   },
 };
@@ -107,12 +181,12 @@ export default {
   align-items: center;
 }
 .containerDetail {
-  width: 80%;
+  width: 65%;
   height: 100%;
   border: #333333 solid 1px;
 }
 .operateAreaDetail {
-  width: 20%;
+  width: 35%;
   height: 100%;
   border: #333333 solid 1px;
 }
