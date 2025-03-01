@@ -26,7 +26,6 @@
           :wrapper-col="{ span: 17 }"
           autocomplete="off"
       >
-
         <a-form-item
             label="节点名称:"
             name="NodeName"
@@ -38,31 +37,12 @@
             label="节点类名:"
             name="NodeClassName"
         >
-          <a-input v-model:value="this.currentNodeInfo.param.name"/>
+          <a-input v-model:value="this.currentNodeInfo.className"/>
         </a-form-item>
         <a-form-item label="节点类型:" name="NodeType">
-          <a-input disabled v-model:value="this.currentNodeInfo.param.type"/>
+          <a-input disabled v-model:value="this.currentNodeInfo.type"/>
         </a-form-item>
 
-        <!--        <a-form-item label="节点参数:" name="NodeParam">-->
-        <!--          <br>-->
-        <!--          <br>-->
-        <!--          <a-form v-if="currentNodeInfo.param">-->
-        <!--            <template v-for="(value, key) in currentNodeInfo.param" :key="key">-->
-        <!--              <a-form-item-->
-        <!--                  :label=key-->
-        <!--                  :name= key-->
-        <!--              >-->
-        <!--                <a-input-->
-        <!--                    :value = value-->
-        <!--                />-->
-        <!--              </a-form-item>-->
-        <!--            </template>-->
-        <!--          </a-form>-->
-        <!--          <div v-else class="param-empty">-->
-        <!--            暂无节点参数-->
-        <!--          </div>-->
-        <!--        </a-form-item>-->
         <a-form-item
             label="节点参数:"
             name="NodeParam"
@@ -70,22 +50,22 @@
           <a-form
               ref="formRef"
               name="dynamic_form_nest_item"
-              :model="dynamicValidateForm"
+              :model="this.currentNodeInfo"
           >
             <a-space
-                v-for="(param, index) in dynamicValidateForm.params"
+                v-for="(param, index) in this.currentNodeInfo.dynamicParams"
                 style="display: flex; margin-bottom: 5px"
                 align="baseline"
             >
               <a-form-item
-                  :name="['params', index, 'paramName']"
+                  :name="['dynamicParams', index, 'paramName']"
                   :rules="{required: false,message: 'Missing param name',}"
               >
                 <a-input v-model:value="param.paramName" placeholder="Param Name"/>
               </a-form-item>
               :
               <a-form-item
-                  :name="['params', index, 'paramValue']"
+                  :name="['dynamicParams', index, 'paramValue']"
                   :rules="{required: false,message: 'Missing param value',}"
               >
                 <a-input v-model:value="param.paramValue" placeholder="Param Value"/>
@@ -133,13 +113,6 @@ import {
 
 //方法
 import {getProcessNodeList, save} from '../../../api/flowProcess.js';
-// import {
-//   PieChartOutlined,
-//   CodeOutlined,
-//   HomeOutlined,
-//   ShareAltOutlined,
-//   EditOutlined
-// } from '@ant-design/icons-vue';
 
 export default {
 
@@ -198,13 +171,20 @@ export default {
       this.lf.extension.selectionSelect.setSelectionSense(false, false);
       this.lf.extension.dndPanel.setPatternItems(this.businessNodeList);
 
-      this.lf.on("node:click", (data, e, position) => {
-        console.log(data.data)
-        this.currentNodeInfo.id = data.data.id;
-        this.currentNodeInfo.name = data.data.text.value;
-        this.currentNodeInfo.param = data.data.properties;
+      //节点被单击
+      this.lf.on("node:click", (data) => {
+        this.currentNodeInfo =this.getNodeInfoByNodeId(data.data.id)
       });
 
+      //节点被添加
+      this.lf.on("node:dnd-add", (data) => {
+        const nodeInfo = this.createNodeInfo(data);
+        this.putToAllNodeInfo(nodeInfo)
+      });
+     // 节点被删除
+      this.lf.on("node:delete", (data) => {
+        this.removeNodeByNode(data)
+      });
     },
 
     //保存节点信息
@@ -212,18 +192,14 @@ export default {
       this.gridData = this.lf.getGraphData();
       try {
         this.transformFeToBe(this.gridData)
-        console.log("transBeObject")
         console.log(this.beObject)
-
-        //清空画布
-        this.lf.clearData()
-
+         //清空画布
+         this.lf.clearData()
+        //调用后端
         save(this.beObject).then(resp => {
           if (resp != null && resp.data !== null) {
             console.log("流程创建成功")
-            console.log(resp.data)
             const graphData = JSON.parse(resp.data.jsonData);
-            console.log(graphData)
             //回显数据
             this.lf.render(graphData);
             this.lf.translateCenter();
@@ -244,16 +220,31 @@ export default {
 
     //对象转换方法
     transformFeToBe(feObject) {
+
       // 转换nodes到nodeEntities
       if (feObject.nodes) {
         feObject.nodes.forEach(node => {
+
+          const dynamicParams = {};
+
+          if (this.allNodeInfo[this.getTinyNodeId(node.id)]) {
+            const currentNodeInfo = this.allNodeInfo[this.getTinyNodeId(node.id)]
+            const dynamicParamsArray =currentNodeInfo.dynamicParams
+            if (dynamicParamsArray && dynamicParamsArray.length > 0) {
+              dynamicParamsArray.forEach(param => {
+                dynamicParams[param.paramName] = param.paramValue;
+              })
+            }
+          }
+
           this.beObject.nodeEntities.push({
             id: node.id,
             name: node.properties.name,
             label: node.text.value,
             nodeType: node.properties.type,
+            dynamicParams: dynamicParams,
             x: node.x,
-            y: node.y
+            y: node.y,
           });
         });
       }
@@ -282,25 +273,48 @@ export default {
       }
 
       this.beObject.jsonData = JSON.stringify(feObject);
+      this.beObject.allNodeInfo = JSON.stringify(this.allNodeInfo);
     },
 
-    saveNodeInfo(info) {
-      console.log('Success:', info);
-      console.log('Success:', this.dynamicValidateForm);
+    saveNodeInfo(currentNodeInfo) {
+      console.log('currentNodeInfo:', currentNodeInfo);
     },
-
     removeUser(item) {
-      const index = this.dynamicValidateForm.params.indexOf(item);
+      const index = this.currentNodeInfo.dynamicParams.indexOf(item);
       if (index !== -1) {
-        this.dynamicValidateForm.params.splice(index, 1);
+        this.currentNodeInfo.dynamicParams.splice(index, 1);
       }
     },
     addParam() {
-      this.dynamicValidateForm.params.push({
-        paramName: '',
-        paramValue: '',
-        NodeInfo: this.currentNodeInfo,
-      });
+        this.currentNodeInfo.dynamicParams.push({
+          paramName: '',
+          paramValue: '',
+        });
+    },
+    createNodeInfo(data) {
+      return {
+        id: data.data.id,
+        name: data.data.text.value,
+        className: data.data.properties.name,
+        type: data.data.properties.type,
+        dynamicParams:[],
+      };
+    },
+    putToAllNodeInfo(nodeInfo){
+      const nodeId = this.getTinyNodeId(nodeInfo.id)
+      this.allNodeInfo[nodeId] = nodeInfo
+    },
+    removeNodeByNode(nodeInfo){
+      const nodeId = this.getTinyNodeId(nodeInfo.data.id)
+      delete this.allNodeInfo[nodeId]
+    },
+    getNodeInfoByNodeId(nodeIdOrigin){
+      const nodeId = this.getTinyNodeId(nodeIdOrigin)
+      return this.allNodeInfo[nodeId]
+    },
+    getTinyNodeId(nodeId){
+      const parts = nodeId.split('-'); // 按-分割成数组
+      return parts.slice(0, 2).join(''); // 取前两个部分并用-连接
     },
   },
   data() {
@@ -312,20 +326,14 @@ export default {
         nodeEntities: [],
         nodeEdges: [],
         jsonData: '',
+        allNodeInfo: '',
         chainName: '',
         applicationName: '',
         chainDesc: '',
         enable: 0
       },
-      currentNodeInfo: {
-        id: '',
-        name: '',
-        param: '',
-      },
-      dynamicValidateForm: {
-        params: [],
-      },
-
+      allNodeInfo:{},
+      currentNodeInfo: {},
     };
   },
 };
@@ -354,10 +362,5 @@ export default {
   width: 35%;
   height: 100%;
   border: #333333 solid 1px;
-}
-
-.inputStyle {
-  width: 50%;
-  margin-left: 50%
 }
 </style>
