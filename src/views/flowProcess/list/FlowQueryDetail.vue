@@ -98,7 +98,7 @@ export default {
   components: {PlusOutlined, MinusCircleOutlined},
   //初次加载时候 挂载
   mounted() {
-      this.init();
+    this.init();
   },
 
   methods: {
@@ -129,6 +129,7 @@ export default {
       })
       this.lf.extension.selectionSelect.openSelectionSelect();
       this.lf.extension.selectionSelect.setSelectionSense(false, false);
+      this.lf.render();
       this.settingGraphData()
       //节点被单击
       this.lf.on("node:click", (data) => {
@@ -138,16 +139,17 @@ export default {
     settingGraphData() {
       if (this.$route.params.record) {
         this.rowData = JSON.parse(this.$route.params.record);
-        console.log(this.rowData)
         //渲染加载
-        const graphData = JSON.parse(this.rowData.jsonData);
-        this.lf.render(graphData);
-        this.lf.translateCenter();
-        this.allNodeInfo = JSON.parse(this.rowData.allNodeInfo);
+        if (this.rowData.jsonData!==null&&this.rowData.jsonData!==''){
+          console.log(this.rowData.json)
+          const graphData = JSON.parse(this.rowData.jsonData);
+          this.lf.render(graphData);
+          this.lf.translateCenter();
+        }
+        if(this.rowData.allNodeInfo!==null&&this.rowData.allNodeInfo!==''){
+          this.allNodeInfo = JSON.parse(this.rowData.allNodeInfo);
+        }
       }
-    },
-    saveNodeInfo(currentNodeInfo) {
-      console.log('currentNodeInfo:', currentNodeInfo);
     },
     getNodeInfoByNodeId(nodeIdOrigin){
       const nodeId = this.getTinyNodeId(nodeIdOrigin)

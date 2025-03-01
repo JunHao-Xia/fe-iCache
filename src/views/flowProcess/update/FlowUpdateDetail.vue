@@ -1,16 +1,27 @@
 <template>
   <div class="drawAreaUpdate">
-    <div class="containerUpdate" ref="container"> </div>
+    <div class="containerUpdate" ref="container"></div>
     <div class="operateAreaUpdate">
       <h1>流程详情信息</h1>
+      <a-select
+          v-model:value="currentService"
+          show-search
+          placeholder="选择流程挂载的服务名称"
+          style="width: 100%"
+          :options="this.bizServiceList"
+          :filter-option="filterOption"
+          @focus="handleFocus"
+          @blur="handleBlur"
+          @change="handleChange"
+      ></a-select>
       <br>
-      <a-input v-model:value="this.beObjectUpdate.applicationName" placeholder="请输入流程挂载的服务名称" />
+<!--      <a-input v-model:value="this.beObjectUpdate.applicationName" placeholder="请输入流程挂载的服务名称"/>-->
+<!--      <br>-->
+      <br>
+      <a-input v-model:value="this.beObjectUpdate.chainName" placeholder="请输入流程名称"/>
       <br>
       <br>
-      <a-input v-model:value="this.beObjectUpdate.chainName" placeholder="请输入流程名称" />
-      <br>
-      <br>
-      <a-textarea v-model:value="this.beObjectUpdate.chainDesc" placeholder="请输入流程描述" :rows="4" />
+      <a-textarea v-model:value="this.beObjectUpdate.chainDesc" placeholder="请输入流程描述" :rows="4"/>
       <br>
       <br>
       <h1>当前节点信息</h1>
@@ -98,7 +109,7 @@ import {
   SelectionSelect,
   Snapshot
 } from "@logicflow/extension";
-import {getProcessNodeList, updateFlowChain} from "../../../api/flowProcess.js";
+import {getBizServiceList, getProcessNodeList, updateFlowChain} from "../../../api/flowProcess.js";
 import {MinusCircleOutlined, PlusOutlined} from "@ant-design/icons-vue";
 
 export default {
@@ -115,9 +126,19 @@ export default {
     //加载业务节点
     async loadData() {
       try {
-        const resp = await getProcessNodeList();
-        this.businessNodeList = resp.data;
+        const businessNodeList = await getProcessNodeList();
+        const bizServiceList = await getBizServiceList();
+        this.businessNodeList = businessNodeList.data;
+        if(bizServiceList.data!==null){
+          bizServiceList.data.forEach(item => {
+            this.bizServiceList.push({
+              value: item,
+              label: item
+            });
+          });
+        }
         console.log('获取流程节点列表成功')
+        console.log('已经注册的服务列表', this.bizServiceList)
       } catch (error) {
         console.error('Error fetching node list:', error);
       }
@@ -127,7 +148,7 @@ export default {
       //初始化
       this.lf = new LogicFlow({
         //插件注册
-        plugins: [Highlight,DndPanel,Menu,Control,MiniMap,SelectionSelect,InsertNodeInPolyline,Snapshot],
+        plugins: [Highlight, DndPanel, Menu, Control, MiniMap, SelectionSelect, InsertNodeInPolyline, Snapshot],
         container: this.$refs.container,
         //是否显示网格
         grid: true,
@@ -151,9 +172,10 @@ export default {
       this.lf.extension.selectionSelect.openSelectionSelect();
       this.lf.extension.selectionSelect.setSelectionSense(false, false);
       this.lf.extension.dndPanel.setPatternItems(this.businessNodeList);
+      this.lf.render();
       //节点被单击
       this.lf.on("node:click", (data) => {
-        this.currentNodeInfo =this.getNodeInfoByNodeId(data.data.id)
+        this.currentNodeInfo = this.getNodeInfoByNodeId(data.data.id)
       });
 
       //节点被添加
@@ -166,6 +188,7 @@ export default {
         this.removeNodeByNode(data)
       });
       this.settingGraphData()
+      this.currentService = this.rowData.applicationName;
       this.loadFLowChainUpdateInfo()
     },
     //渲染图数据
@@ -173,17 +196,19 @@ export default {
       if (this.$route.params.record) {
         this.rowData = JSON.parse(this.$route.params.record);
         //渲染加载
-        const graphData = JSON.parse(this.rowData.jsonData);
-        this.lf.render(graphData);
-        this.lf.translateCenter();
-        console.log('渲染流程图成功')
-        console.log(this.rowData)
-        this.allNodeInfo = JSON.parse(this.rowData.allNodeInfo);
+        if (this.rowData.jsonData !== null && this.rowData.jsonData !== '') {
+          const graphData = JSON.parse(this.rowData.jsonData);
+          this.lf.render(graphData);
+          this.lf.translateCenter();
+          console.log('渲染流程图成功')
+        }
+        if (this.rowData.allNodeInfo !== null && this.rowData.allNodeInfo !== '') {
+          this.allNodeInfo = JSON.parse(this.rowData.allNodeInfo);
+        }
       }
     },
-    loadFLowChainUpdateInfo(){
+    loadFLowChainUpdateInfo() {
       this.beObjectUpdate.id = this.rowData.id;
-      this.beObjectUpdate.applicationName = this.rowData.applicationName;
       this.beObjectUpdate.chainName = this.rowData.chainName;
       this.beObjectUpdate.chainDesc = this.rowData.chainDesc;
       this.beObjectUpdate.enable = this.rowData.enable;
@@ -198,6 +223,7 @@ export default {
         console.log(this.beObjectUpdate)
 
         //构建updateFlowChain方法需要的参数
+        this.beObjectUpdate.applicationName = this.currentService
         this.beObjectUpdate.jsonData = JSON.stringify(this.gridData);
         this.beObjectUpdate.allNodeInfo = JSON.stringify(this.allNodeInfo);
         console.log(this.beObjectUpdate)
@@ -207,7 +233,7 @@ export default {
 
         //调用修改流程方法
         updateFlowChain(this.beObjectUpdate).then(resp => {
-          if(resp!=null&&resp.data!==null){
+          if (resp != null && resp.data !== null) {
             console.log('修改流程成功')
             console.log(resp.data)
             const graphData = JSON.parse(resp.data.jsonData);
@@ -222,27 +248,41 @@ export default {
           }
         })
         //清空对象
-        this.beObjectUpdate={
+        this.beObjectUpdate = {
           nodeEntities: [],
           nodeEdges: [],
-          jsonData:'',
+          jsonData: '',
         };
       } catch (error) {
         console.error("请求失败，请检查网络或服务器状态", error);
       }
     },
     //对象转换方法
+
+
     transformFeToBe(feObject) {
       // 转换nodes到nodeEntities
       if (feObject.nodes) {
         feObject.nodes.forEach(node => {
+          const dynamicParams = {};
+          console.log('this.allNodeInfo', this.allNodeInfo)
+          if (this.allNodeInfo[this.getTinyNodeId(node.id)]) {
+            const currentNodeInfo = this.allNodeInfo[this.getTinyNodeId(node.id)]
+            const dynamicParamsArray =currentNodeInfo.dynamicParams
+            if (dynamicParamsArray && dynamicParamsArray.length > 0) {
+              dynamicParamsArray.forEach(param => {
+                dynamicParams[param.paramName] = param.paramValue;
+              })
+            }
+          }
           this.beObjectUpdate.nodeEntities.push({
             id: node.id,
             name: node.properties.name,
             label: node.text.value,
             nodeType: node.properties.type,
+            dynamicParams: dynamicParams,
             x: node.x,
-            y: node.y
+            y: node.y,
           });
         });
       }
@@ -252,11 +292,11 @@ export default {
         feObject.edges.forEach(edge => {
           let ifNodeFlag = false;
           let tag = '';
-          if(edge.text !==undefined && edge.text !== null&& edge.text.value!==""){
-            if(edge.text.value!=="true" && edge.text.value!=="false"){
+          if (edge.text !== undefined && edge.text !== null && edge.text.value !== "") {
+            if (edge.text.value !== "true" && edge.text.value !== "false") {
               //switch 语句 设置 tag 才能判断
               tag = edge.text.value;
-            }else {
+            } else {
               //if 节点 需要设置 ifNodeFlag判断符号
               ifNodeFlag = edge.text.value === "true";
             }
@@ -288,37 +328,51 @@ export default {
         name: data.data.text.value,
         className: data.data.properties.name,
         type: data.data.properties.type,
-        dynamicParams:[],
+        dynamicParams: [],
       };
     },
-    putToAllNodeInfo(nodeInfo){
+    putToAllNodeInfo(nodeInfo) {
       const nodeId = this.getTinyNodeId(nodeInfo.id)
       this.allNodeInfo[nodeId] = nodeInfo
     },
-    removeNodeByNode(nodeInfo){
+    removeNodeByNode(nodeInfo) {
       const nodeId = this.getTinyNodeId(nodeInfo.data.id)
       delete this.allNodeInfo[nodeId]
     },
-    getNodeInfoByNodeId(nodeIdOrigin){
+    getNodeInfoByNodeId(nodeIdOrigin) {
       const nodeId = this.getTinyNodeId(nodeIdOrigin)
       return this.allNodeInfo[nodeId]
     },
-    getTinyNodeId(nodeId){
+    getTinyNodeId(nodeId) {
       const parts = nodeId.split('-'); // 按-分割成数组
       return parts.slice(0, 2).join(''); // 取前两个部分并用-连接
+    },
+
+     handleChange (value) {
+      console.log(`selected ${value}`);
+    },
+     handleBlur(){
+      console.log('blur');
+    },
+     handleFocus (){
+      console.log('focus');
+    },
+     filterOption (option,input) {
+      return option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
     },
   },
   data() {
     return {
       gridData: {},
       businessNodeList: [],
+      bizServiceList: [],
       lf: null,
-      rowData:{},
-      beObjectUpdate : {
+      rowData: {},
+      beObjectUpdate: {
         nodeEntities: [],
         nodeEdges: [],
-        jsonData:'',
-        allNodeInfo:'',
+        jsonData: '',
+        allNodeInfo: '',
         id: 0,
         chainName: '',
         applicationName: '',
@@ -326,10 +380,12 @@ export default {
         elData: '',
         enable: 0
       },
-      allNodeInfo:{},
+      allNodeInfo: {},
       currentNodeInfo: {},
+      currentService:undefined
     }
-}}
+  }
+}
 </script>
 <style scoped>
 .drawAreaUpdate {
@@ -341,11 +397,13 @@ export default {
   justify-content: center;
   align-items: center;
 }
+
 .containerUpdate {
   width: 70%;
   height: 100%;
   border: #333333 solid 1px;
 }
+
 .operateAreaUpdate {
   width: 30%;
   height: 100%;
