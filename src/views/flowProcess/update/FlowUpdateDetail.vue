@@ -8,7 +8,7 @@
           show-search
           placeholder="选择流程挂载的服务名称"
           style="width: 100%"
-          :options="this.bizServiceList"
+          :options="bizServiceList"
           :filter-option="filterOption"
           @focus="handleFocus"
           @blur="handleBlur"
@@ -127,8 +127,9 @@ export default {
     async loadData() {
       try {
         const businessNodeList = await getProcessNodeList();
-        const bizServiceList = await getBizServiceList();
         this.businessNodeList = businessNodeList.data;
+
+        const bizServiceList = await getBizServiceList();
         if(bizServiceList.data!==null){
           bizServiceList.data.forEach(item => {
             this.bizServiceList.push({

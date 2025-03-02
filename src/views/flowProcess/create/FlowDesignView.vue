@@ -4,9 +4,20 @@
     </div>
     <div class="operateArea">
       <h1>输入流程信息</h1>
+      <a-select
+          v-model:value="currentService"
+          show-search
+          placeholder="选择流程挂载的服务名称"
+          style="width: 100%"
+          :options="bizServiceList"
+          :filter-option="filterOption"
+          @focus="handleFocus"
+          @blur="handleBlur"
+          @change="handleChange"
+      ></a-select>
       <br>
-      <a-input v-model:value="this.beObject.applicationName" placeholder="请输入流程挂载的服务名称"/>
-      <br>
+<!--      <a-input v-model:value="this.beObject.applicationName" placeholder="请输入流程挂载的服务名称"/>-->
+<!--      <br>-->
       <br>
       <a-input v-model:value="this.beObject.chainName" placeholder="请输入流程名称"/>
       <br>
@@ -106,7 +117,7 @@ import {
 } from '@logicflow/extension';
 
 //方法
-import {getProcessNodeList, save} from '../../../api/flowProcess.js';
+import {getBizServiceList, getProcessNodeList, save} from '../../../api/flowProcess.js';
 
 export default {
 
@@ -125,10 +136,20 @@ export default {
   methods: {
     async loadData() {
       try {
-        const resp = await getProcessNodeList();
-        this.businessNodeList = resp.data;
-        console.log('获取流程节点成功')
-        console.log(this.businessNodeList)
+        const businessNodeList = await getProcessNodeList();
+        this.businessNodeList = businessNodeList.data;
+        const bizServiceList = await getBizServiceList();
+        if(bizServiceList.data!==null){
+          bizServiceList.data.forEach(item => {
+            this.bizServiceList.push({
+              value: item,
+              label: item
+            });
+          });
+        }
+        console.log('获取流程节点列表成功')
+        console.log('已经注册的服务列表', this.bizServiceList)
+
       } catch (error) {
         console.error('Error fetching node list:', error);
       }
@@ -164,7 +185,6 @@ export default {
       this.lf.extension.selectionSelect.openSelectionSelect();
       this.lf.extension.selectionSelect.setSelectionSense(false, false);
       this.lf.extension.dndPanel.setPatternItems(this.businessNodeList);
-
       //节点被单击
       this.lf.on("node:click", (data) => {
         this.currentNodeInfo =this.getNodeInfoByNodeId(data.data.id)
@@ -185,21 +205,25 @@ export default {
     saveFlow() {
       this.gridData = this.lf.getGraphData();
       try {
-        this.transformFeToBe(this.gridData)
-        console.log(this.beObject)
+        //this.transformFeToBe(this.gridData)
+        //console.log(this.beObject)
          //清空画布
-         this.lf.clearData()
+         //this.lf.clearData()
         //调用后端
+        this.beObject.applicationName = this.currentService
         save(this.beObject).then(resp => {
-          if (resp != null && resp.data !== null) {
+          console.log(resp)
+          if (resp != null && resp.success &&resp.data !== null) {
             console.log("流程创建成功")
-            const graphData = JSON.parse(resp.data.jsonData);
+            //const graphData = JSON.parse(resp.data.jsonData);
             //回显数据
-            this.lf.render(graphData);
-            this.lf.translateCenter();
-            this.beObject.applicationName = resp.data.applicationName;
+            // this.lf.render(graphData);
+            // this.lf.translateCenter();
+            this.currentService = resp.data.applicationName;
             this.beObject.chainName = resp.data.chainName;
             this.beObject.chainDesc = resp.data.chainDesc;
+          }else{
+            console.log("流程创建成功")
           }
         })
         this.beObject = {
@@ -211,7 +235,6 @@ export default {
         console.error("请求失败，请检查网络或服务器状态", error);
       }
     },
-
     //对象转换方法
     transformFeToBe(feObject) {
 
@@ -269,10 +292,6 @@ export default {
       this.beObject.jsonData = JSON.stringify(feObject);
       this.beObject.allNodeInfo = JSON.stringify(this.allNodeInfo);
     },
-
-    saveNodeInfo(currentNodeInfo) {
-      console.log('currentNodeInfo:', currentNodeInfo);
-    },
     removeUser(item) {
       const index = this.currentNodeInfo.dynamicParams.indexOf(item);
       if (index !== -1) {
@@ -310,6 +329,18 @@ export default {
       const parts = nodeId.split('-'); // 按-分割成数组
       return parts.slice(0, 2).join(''); // 取前两个部分并用-连接
     },
+    handleChange (value) {
+      console.log(`selected ${value}`);
+    },
+    handleBlur(){
+      console.log('blur');
+    },
+    handleFocus (){
+      console.log('focus');
+    },
+    filterOption (option,input) {
+      return option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+    },
   },
   data() {
     return {
@@ -328,6 +359,8 @@ export default {
       },
       allNodeInfo:{},
       currentNodeInfo: {},
+      currentService:undefined,
+      bizServiceList: [],
     };
   },
 };
